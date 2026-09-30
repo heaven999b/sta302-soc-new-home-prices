@@ -1,0 +1,12 @@
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*_cache/
+*_files/
+
+# Python
+__pycache__/
+
+# macOS
+.DS_Store

@@ -1,0 +1,19 @@
+var,type,mean,sd,min,median,max,skew,n_missing,levels
+price_k,numeric,526.9679076212472,307.41343348593614,209.9,433.0,3300.0,3.04344955605323,0.0,
+sqft100,numeric,25.44808545034642,9.945592067713099,7.11,23.0,85.07,1.6731462863931128,0.0,
+lot_k,numeric,14.06419399538106,16.561092482325588,2.0,8.7,87.12,3.1012018674161137,0.0,
+sale_month,numeric,6.282678983833718,3.415616471419311,1.0,6.0,12.0,0.09453101614826194,0.0,
+division,categorical (9 levels),,,,,,,,SouthAtlantic: 1308; WSCentral: 850; ENCentral: 510; Mountain: 473; Pacific: 374; ESCentral: 344; WNCentral: 313; MidAtlantic: 119; NewEngland: 39
+stories,categorical (3 levels),,,,,,,,1: 2120; 2: 2116; 3plus: 94
+bedrooms,categorical (4 levels),,,,,,,,3: 1780; 4: 1777; 5plus: 619; 2orless: 154
+fullbath,categorical (4 levels),,,,,,,,2: 2664; 3: 1203; 4plus: 417; 1orless: 46
+halfbath,categorical (3 levels),,,,,,,,0: 2373; 1: 1897; 2plus: 60
+garage,categorical (4 levels),,,,,,,,2car: 3124; 3plus: 919; 1car: 158; other: 129
+foundation,categorical (4 levels),,,,,,,,slab: 2926; basement: 992; crawl: 403; other: 9
+fireplace,categorical (3 levels),,,,,,,,0: 2781; 1: 1383; 2plus: 166
+hoa,categorical (2 levels),,,,,,,,yes: 3221; no: 1109
+age_restricted,categorical (2 levels),,,,,,,,no: 4216; yes: 114
+wall,categorical (7 levels),,,,,,,,vinyl: 1362; fibercement: 926; stucco: 906; brick: 897; wood: 169; stone: 56; other: 14
+heat_fuel,categorical (4 levels),,,,,,,,electric: 2147; gas: 2083; propane: 52; other: 48
+sewer,categorical (2 levels),,,,,,,,public: 3893; septic: 437
+stage,categorical (3 levels),,,,,,,,completed: 2452; under_constr: 1344; not_started: 534

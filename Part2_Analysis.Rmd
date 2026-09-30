@@ -1,0 +1,750 @@
+---
+title: "STA302 Project Part 2 -- 分析（仅训练集）"
+subtitle: "SOC 2025 新建独栋住宅售价：面积 × Census division"
+author: "Group [##]"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", comment = "#>")
+options(width = 110)
+```
+
+> **说明**：本文件是组内的 Part 2 工作稿，叙述用中文，代码与图用英文。它读取 `Part1_Code.Rmd` 写出的
+> `data/cleaned/soc_clean.csv`，所以**先 knit Part 1，再 knit 本文件**。
+>
+> **全部分析只用训练集（4,330 行）。** 测试集的行在读入后立即丢弃；最后一节"测试集最终验证"的代码块
+> 设为 `eval = FALSE`，只在 Part 2 全部定稿后运行一次。
+
+```{r packages}
+library(MASS)       # boxcox()
+library(car)        # vif()
+library(sandwich)   # vcovHC(), vcovCL()
+library(lmtest)     # coeftest()
+set.seed(302)
+dir.create("figures", showWarnings = FALSE)
+```
+
+# 数据：只保留训练集
+
+```{r data}
+division_levels <- c("SouthAtlantic", "NewEngland", "MidAtlantic", "ENCentral", "WNCentral",
+                     "ESCentral", "WSCentral", "Mountain", "Pacific")
+factor_levels <- list(
+  division = division_levels, stories = c("1", "2", "3plus"),
+  bedrooms = c("2orless", "3", "4", "5plus"), fullbath = c("1orless", "2", "3", "4plus"),
+  halfbath = c("0", "1", "2plus"), garage = c("1car", "2car", "3plus", "other"),
+  foundation = c("basement", "crawl", "slab", "other"), fireplace = c("0", "1", "2plus"),
+  hoa = c("no", "yes"), age_restricted = c("no", "yes"),
+  wall = c("brick", "wood", "stucco", "vinyl", "stone", "fibercement", "other"),
+  heat_fuel = c("electric", "gas", "propane", "other"), sewer = c("public", "septic"),
+  stage = c("completed", "under_constr", "not_started"))
+prep <- function(d) {
+  for (v in names(factor_levels)) {
+    if (v %in% names(d)) d[[v]] <- factor(d[[v]], levels = factor_levels[[v]])
+  }
+  d$log_price <- log(d$price_k)
+  d$log_sqft <- log(d$sqft100 * 100)
+  d
+}
+
+soc_all <- read.csv("data/cleaned/soc_clean.csv", stringsAsFactors = FALSE)
+train <- prep(soc_all[soc_all$split == "train", ])
+rm(soc_all)                       # test rows are discarded here and never used below
+n <- nrow(train)
+n
+```
+
+```{r helpers}
+skew <- function(x) { z <- x - mean(x); mean(z^3) / mean(z^2)^1.5 }
+exkurt <- function(x) { z <- x - mean(x); mean(z^4) / mean(z^2)^2 - 3 }
+bp_koenker <- function(m, e = resid(m), X = model.matrix(m)) {   # Koenker (studentized) BP
+  e2 <- e^2; aux <- lm.fit(X, e2)
+  r2 <- 1 - sum(aux$residuals^2) / sum((e2 - mean(e2))^2)
+  LM <- length(e2) * r2; df <- ncol(X) - 1
+  c(LM = LM, df = df, p = pchisq(LM, df, lower.tail = FALSE))
+}
+r2 <- function(m) summary(m)$r.squared
+adjr2 <- function(m) summary(m)$adj.r.squared
+# nested F test (classical) and HC3 Wald F test for the terms that differ between two models
+pf_test <- function(full, red) {
+  a <- anova(red, full)
+  c(F = a$F[2], df = a$Df[2], p = a[2, "Pr(>F)"], dR2 = r2(full) - r2(red))
+}
+# HC3 covariance. Identical to vcovHC(m, type = "HC3") except that an observation with leverage 1
+# (its residual is exactly 0 and e/(1-h) is 0/0) contributes 0 to the "meat" instead of NaN.
+# This only matters in the division x fullbath confounding check, where one division-by-bathroom
+# cell contains a single house.
+vcov_hc3 <- function(m) {
+  vcovHC(m, omega = function(residuals, diaghat, df)
+    ifelse(diaghat > 1 - 1e-10, 0, residuals^2 / (1 - diaghat)^2))
+}
+fp <- function(p) formatC(p, format = "e", digits = 2)       # p-values for tables
+# HC3 Wald F test that the coefficients in `full` but not in `red` are all zero. Written out by hand
+# (same as lmtest::waldtest(full, red, vcov = vcovHC(full, "HC3"), test = "F")) because waldtest()
+# refuses models with aliased (NA) coefficients, which occur in one confounding check below.
+hc3_test <- function(full, red) {
+  b <- coef(full); b <- b[!is.na(b)]
+  V <- vcov_hc3(full)[names(b), names(b)]
+  tt <- setdiff(names(b), names(coef(red))[!is.na(coef(red))])
+  q <- length(tt)
+  Fs <- drop(t(b[tt]) %*% solve(V[tt, tt]) %*% b[tt]) / q
+  c(F = Fs, df = q, p = pf(Fs, q, df.residual(full), lower.tail = FALSE))
+}
+# slope of the focal variable in each division: beta_X + beta_{X:division_g}
+div_slopes <- function(m, x, V = vcov(m), df = df.residual(m)) {
+  b <- coef(m)
+  t(sapply(division_levels, function(g) {
+    L <- setNames(numeric(length(b)), names(b)); L[x] <- 1
+    if (g != "SouthAtlantic") L[paste0(x, ":division", g)] <- 1
+    est <- sum(L * b); se <- sqrt(drop(t(L) %*% V %*% L)); tq <- qt(0.975, df)
+    c(est = est, se = se, lower = est - tq * se, upper = est + tq * se,
+      p = 2 * pt(-abs(est / se), df))
+  }))
+}
+icc_oneway <- function(r, g) {                   # one-way ANOVA ICC estimator
+  g <- factor(g); k <- nlevels(g); N <- length(r); ni <- as.numeric(table(g))
+  gm <- tapply(r, g, mean)
+  msb <- sum(ni * (gm - mean(r))^2) / (k - 1)
+  msw <- sum((r - gm[as.character(g)])^2) / (N - k)
+  n0 <- (N - sum(ni^2) / N) / (k - 1)
+  (msb - msw) / (msb + (n0 - 1) * msw)
+}
+fig_out <- function(name, width, height, draw) {
+  png(file.path("figures", name), width = width, height = height, units = "in", res = 200)
+  draw(); invisible(dev.off()); draw()
+}
+pt_col <- adjustcolor("#33658a", alpha.f = 0.25); ln_col <- "#d1495b"
+```
+
+# 起点：Part 1 模型（原始售价）
+
+```{r part1-model}
+ctrl_all <- "lot_k + stories + bedrooms + fullbath + halfbath + garage + foundation + fireplace + hoa + age_restricted + wall + heat_fuel + sewer + stage + sale_month"
+f1 <- as.formula(paste("price_k ~ sqft100 * division +", ctrl_all))
+m1 <- lm(f1, data = train)
+m1_noint <- update(m1, . ~ . - sqft100:division)
+m1_noX <- update(m1, . ~ . - sqft100:division - sqft100)
+p1_int_F <- pf_test(m1, m1_noint)
+p1_int_hc3 <- hc3_test(m1, m1_noint)
+rbind(partial_F = p1_int_F[c("F", "df", "p")], HC3_Wald = p1_int_hc3)
+slopes_p1 <- div_slopes(m1, "sqft100")
+slopes_p1_hc3 <- div_slopes(m1, "sqft100", V = vcov_hc3(m1))
+knitr::kable(data.frame(round(slopes_p1[, 1:4], 2), se_HC3 = round(slopes_p1_hc3[, "se"], 2),
+                        p_HC3 = fp(slopes_p1_hc3[, "p"])),
+             caption = "Part 1 模型各 division 的面积斜率（千美元 / 100 sqft）")
+```
+
+Part 1 的主要问题（见 Part 1 残差分析）：右偏重尾（残差偏度 `r sprintf("%.2f", skew(resid(m1)))`、
+超额峰度 `r sprintf("%.1f", exkurt(resid(m1)))`）、明显异方差（喇叭形）、残差对面积和拟合值有轻微弯曲。
+
+# Box-Cox 变换
+
+`MASS::boxcox()` 在 Part 1 的完整设计矩阵下计算 λ 的轮廓对数似然。用 0.001 的细网格；另用 `optimize()`
+求精确最大值，以便与 Python（先 0.05 粗网格、再 0.005 细网格）比较。
+
+```{r boxcox, fig.width = 6, fig.height = 4.2}
+# y = TRUE stores the response so that boxcox() does not need to re-fit the model
+bc <- boxcox(lm(f1, data = train, y = TRUE), lambda = seq(-1, 0.5, by = 0.001), plotit = FALSE)
+lambda_hat <- bc$x[which.max(bc$y)]
+lambda_ci <- range(bc$x[bc$y > max(bc$y) - qchisq(0.95, 1) / 2])
+# exact maximiser of the same profile log-likelihood
+X1 <- model.matrix(m1); y1 <- train$price_k; qr1 <- qr(X1)
+bc_ll <- function(l) {
+  yt <- if (abs(l) < 1e-12) log(y1) else (y1^l - 1) / l
+  -n / 2 * log(sum(qr.resid(qr1, yt)^2)) + (l - 1) * sum(log(y1))
+}
+lambda_exact <- optimize(bc_ll, c(-1, 0.5), maximum = TRUE, tol = 1e-10)$maximum
+c(lambda_grid = lambda_hat, ci_low = lambda_ci[1], ci_high = lambda_ci[2], lambda_exact = lambda_exact)
+par(mar = c(4.5, 4.5, 2, 1), las = 1)
+plot(bc$x, bc$y, type = "l", xlab = expression(lambda), ylab = "Profile log-likelihood",
+     main = "Box-Cox profile (Part 1 design)", cex.main = 1)
+abline(v = c(lambda_hat, lambda_ci), lty = c(1, 2, 2), col = ln_col)
+abline(v = 0, lty = 3)
+```
+
+λ̂ ≈ `r sprintf("%.3f", lambda_hat)`，95% CI 为 (`r sprintf("%.3f", lambda_ci[1])`,
+`r sprintf("%.3f", lambda_ci[2])`)，**不含 0**。说明需要比 log 更强一点的压缩。下一节比较 log（λ = 0，
+便于按百分比解释）与 λ = −0.5（最接近 λ̂ 的"整齐"值）。
+
+# 变换方案比较：log–线性、log–log、λ = −0.5
+
+```{r transforms}
+train$bc_m05 <- -2 * (train$price_k^-0.5 - 1)      # Box-Cox lambda = -0.5, increasing in price
+f_loglin <- as.formula(paste("log_price ~ sqft100 * division +", ctrl_all))
+f_loglog <- as.formula(paste("log_price ~ log_sqft * division +", ctrl_all))
+f_bc05   <- as.formula(paste("bc_m05 ~ sqft100 * division +", ctrl_all))
+m_loglin <- lm(f_loglin, data = train)
+m_loglog <- lm(f_loglog, data = train)
+m_bc05   <- lm(f_bc05, data = train)
+cmp_row <- function(m) {
+  e <- resid(m); bp <- bp_koenker(m)
+  c(R2 = r2(m), adjR2 = adjr2(m), BIC = BIC(m), resid_skew = skew(e), resid_exkurt = exkurt(e),
+    BP_LM = unname(bp["LM"]), BP_p = unname(bp["p"]),
+    int_HC3_p = unname(hc3_test(m, update(m, as.formula(paste(". ~ . -",
+                 grep(":division$|:division", attr(terms(m), "term.labels"), value = TRUE)))))["p"]))
+}
+trans_tab <- rbind(`Part 1: price ~ sqft` = cmp_row(m1), `log(price) ~ sqft` = cmp_row(m_loglin),
+                   `log(price) ~ log(sqft)` = cmp_row(m_loglog),
+                   `BoxCox(-0.5) ~ sqft` = cmp_row(m_bc05))
+trans_show <- data.frame(round(trans_tab[, 1:6], 4), BP_p = fp(trans_tab[, "BP_p"]),
+                         int_HC3_p = fp(trans_tab[, "int_HC3_p"]), check.names = FALSE)
+knitr::kable(trans_show,
+             caption = "变换方案比较（BIC 为 R 的 BIC()，只在同一响应变量之间可比）")
+
+# curvature in floor area on the log scale: add a squared term to the log-linear model
+m_loglin_sq <- update(m_loglin, . ~ . + I(sqft100^2))
+sq_test <- pf_test(m_loglin_sq, m_loglin)
+c(sq_test, coef_sq = unname(coef(m_loglin_sq)["I(sqft100^2)"]))
+```
+
+```{r transform-plots, fig.width = 12, fig.height = 4}
+draw_trans <- function() {
+  par(mfrow = c(1, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(train$sqft100, resid(m_loglin), pch = 16, cex = 0.4, col = pt_col,
+       xlab = "sqft100", ylab = "Residual (log scale)", main = "log(price) ~ sqft: residuals vs sqft100",
+       cex.main = 1)
+  abline(h = 0, lty = 2); lines(lowess(train$sqft100, resid(m_loglin), f = 0.3), col = ln_col, lwd = 2)
+  plot(train$log_sqft, resid(m_loglog), pch = 16, cex = 0.4, col = pt_col,
+       xlab = "log(sq ft)", ylab = "Residual (log scale)", main = "log(price) ~ log(sqft): residuals vs log sqft",
+       cex.main = 1)
+  abline(h = 0, lty = 2); lines(lowess(train$log_sqft, resid(m_loglog), f = 0.3), col = ln_col, lwd = 2)
+  qqnorm(rstandard(m_loglog), pch = 16, cex = 0.4, col = pt_col, main = "log-log model: normal QQ",
+         cex.main = 1)
+  qqline(rstandard(m_loglog), col = ln_col, lwd = 2)
+}
+fig_out("part2_transform_check.png", 12, 4, draw_trans)
+```
+
+**结论**：log 变换把残差偏度从 2.04 降到约 0.5、超额峰度从 18 降到约 2.6；λ = −0.5 更接近正态，但系数难以解释。
+log–线性模型在面积上仍有明显凹形（平方项 F = `r sprintf("%.1f", sq_test["F"])`，p =
+`r format(sq_test["p"], digits = 2)`），而 log–log 的 BIC 更低（`r sprintf("%.1f", BIC(m_loglog))` 对
+`r sprintf("%.1f", BIC(m_loglin))`），所以采用 **log(价格) ~ log(面积)**，面积斜率解释为弹性。
+
+# 多重共线性（VIF / GVIF）
+
+`car::vif()` 对多水平类别变量给出 GVIF 和 GVIF^(1/(2·Df))。含交互的模型会出现"结构性"共线（交互列与主效应列
+高度相关），这不是数据问题；把 log 面积减去训练集均值（中心化）后即可消除。
+
+```{r vif}
+vif_tab <- function(m) {
+  v <- suppressMessages(vif(m, type = "terms"))
+  v <- if (is.matrix(v)) v else cbind(GVIF = v, Df = 1, `GVIF^(1/(2*Df))` = sqrt(v))
+  v[order(-v[, 3]), , drop = FALSE]
+}
+m1_main <- update(m1, . ~ . - sqft100:division)
+m_loglog_main <- update(m_loglog, . ~ . - log_sqft:division)
+train$log_sqft_c <- train$log_sqft - mean(train$log_sqft)
+m_loglog_c <- lm(as.formula(paste("log_price ~ log_sqft_c * division +", ctrl_all)), data = train)
+knitr::kable(head(vif_tab(m1_main), 5), digits = 3, caption = "Part 1 模型（只含主效应）")
+knitr::kable(head(vif_tab(m1), 4), digits = 3, caption = "Part 1 模型（含交互）")
+knitr::kable(head(vif_tab(m_loglog_main), 4), digits = 3, caption = "log–log 模型（只含主效应）")
+knitr::kable(head(vif_tab(m_loglog), 4), digits = 3, caption = "log–log 模型（含交互，未中心化）")
+knitr::kable(head(vif_tab(m_loglog_c), 4), digits = 3, caption = "log–log 模型（含交互，log 面积中心化）")
+```
+
+中心化只改变截距和 division 主效应的含义，不改变拟合值、交互系数和各组弹性。
+
+# 变量选择
+
+## 各候选变量的 partial F（`drop1` / `anova`）
+
+完整 log–log 模型中逐个去掉一个变量的 partial F 检验（其余变量保留）：
+
+```{r drop1}
+d1 <- drop1(m_loglog, scope = ~ stories + bedrooms + fullbath + halfbath + garage + foundation +
+              fireplace + hoa + age_restricted + wall + heat_fuel + sewer + stage + sale_month + lot_k,
+            test = "F")
+d1[order(-d1[, "Pr(>F)"]), ]
+# the research-question terms: interaction, and X + interaction
+rbind(interaction = pf_test(m_loglog, update(m_loglog, . ~ . - log_sqft:division)),
+      area_and_interaction = pf_test(m_loglog, update(m_loglog, . ~ . - log_sqft:division - log_sqft)))
+```
+
+## 后向逐步回归：AIC 与 BIC（`step()`）
+
+**强制保留**：`log_sqft`、`division`、`log_sqft:division`（研究问题本身）和 `lot_k`（hedonic 理论：土地是价格
+的一部分）。用 `scope` 的 `lower` 实现。BIC 用 `k = log(n)`。
+
+```{r step}
+lower_f <- ~ log_sqft * division + lot_k
+sel_aic <- step(m_loglog, scope = list(lower = lower_f, upper = formula(m_loglog)),
+                direction = "backward", k = 2, trace = 0)
+sel_bic <- step(m_loglog, scope = list(lower = lower_f, upper = formula(m_loglog)),
+                direction = "backward", k = log(n), trace = 0)
+sel_aic$anova
+sel_bic$anova
+
+# replay each path: partial F of the dropped term, R^2 and adj R^2 after each step
+replay <- function(start, path, k) {
+  drops <- sub("^- ", "", as.character(path$Step[-1]))
+  cur <- start
+  out <- data.frame(step = 0, dropped = "(full log-log model)", criterion = extractAIC(cur, k = k)[2],
+                    BIC_R = BIC(cur), df = NA, F = NA, p = NA, R2 = r2(cur), adjR2 = adjr2(cur))
+  for (i in seq_along(drops)) {
+    new <- update(cur, as.formula(paste(". ~ . -", drops[i])))
+    a <- anova(new, cur)
+    out <- rbind(out, data.frame(step = i, dropped = drops[i], criterion = extractAIC(new, k = k)[2],
+                                 BIC_R = BIC(new), df = a$Df[2], F = a$F[2], p = a[2, "Pr(>F)"],
+                                 R2 = r2(new), adjR2 = adjr2(new)))
+    cur <- new
+  }
+  out
+}
+hist_bic <- replay(m_loglog, sel_bic$anova, log(n))
+hist_aic <- replay(m_loglog, sel_aic$anova, 2)
+knitr::kable(hist_bic, digits = c(0, 0, 3, 3, 0, 3, 5, 5, 5),
+             caption = "BIC 后向选择每一步（criterion = extractAIC(k = log n)，即 step() 实际最小化的量）")
+knitr::kable(hist_aic, digits = c(0, 0, 3, 3, 0, 3, 5, 5, 5), caption = "AIC 后向选择每一步")
+
+# joint partial F: are the BIC-dropped terms jointly needed?
+anova(sel_bic, m_loglog)
+```
+
+BIC 依次删去 `r paste(hist_bic$dropped[-1], collapse = "、")`；AIC 只删去
+`r paste(hist_aic$dropped[-1], collapse = "、")`。注意 `stage` 单独的 partial F p 很小（见上表），被 BIC 删掉是
+因为 BIC 的惩罚 log(n) ≈ `r sprintf("%.2f", log(n))` 较重；两种选择下 adj R² 只差约 0.001。我们采用更简约的
+BIC 模型为最终模型，AIC 模型作为对照（两者的交互结论相同，见下文）。
+
+# 最终模型（log–log，BIC 选择）
+
+```{r final}
+ctrl_fin <- "lot_k + stories + bedrooms + fullbath + halfbath + garage + foundation + fireplace + wall + heat_fuel"
+f_final <- as.formula(paste("log_price ~ log_sqft * division +", ctrl_fin))
+m2 <- lm(f_final, data = train)
+stopifnot(setequal(attr(terms(m2), "term.labels"), attr(terms(sel_bic), "term.labels")))
+m2_noint <- update(m2, . ~ . - log_sqft:division)
+m2_noX <- update(m2, . ~ . - log_sqft:division - log_sqft)
+s2 <- summary(m2)
+c(coefficients = length(coef(m2)), R2 = s2$r.squared, adjR2 = s2$adj.r.squared, sigma = s2$sigma,
+  F = unname(s2$fstatistic[1]))
+p2_int_F <- pf_test(m2, m2_noint); p2_int_hc3 <- hc3_test(m2, m2_noint); p2_X <- pf_test(m2, m2_noX)
+rbind(partial_F = p2_int_F[c("F", "df", "p")], HC3_Wald = p2_int_hc3)
+c(dR2_interaction = unname(p2_int_F["dR2"]), dR2_area_and_interaction = unname(p2_X["dR2"]))
+
+el <- div_slopes(m2, "log_sqft")
+el_hc3 <- div_slopes(m2, "log_sqft", V = vcov_hc3(m2))
+el_tab <- data.frame(n = as.vector(table(train$division)[division_levels]), elasticity = el[, "est"],
+                     lower95 = el[, "lower"], upper95 = el[, "upper"], se_HC3 = el_hc3[, "se"],
+                     p_HC3 = fp(el_hc3[, "p"]), pct_price_per_10pct_area = 100 * (1.1^el[, "est"] - 1))
+knitr::kable(el_tab, digits = c(0, 3, 3, 3, 3, 0, 2), caption = "最终模型：各 division 的面积弹性")
+
+ci2 <- confint(m2)
+final_coef <- data.frame(term = names(coef(m2)), estimate = coef(m2), se = s2$coefficients[, 2],
+                         lower95 = ci2[, 1], upper95 = ci2[, 2],
+                         se_HC3 = sqrt(diag(vcov_hc3(m2))), row.names = NULL)
+knitr::kable(final_coef, digits = 4, caption = "最终模型全部 46 个系数")
+```
+
+## 最终模型的多重共线性
+
+```{r vif-final}
+m2_c <- lm(as.formula(paste("log_price ~ log_sqft_c * division +", ctrl_fin)), data = train)
+knitr::kable(head(vif_tab(m2_noint), 4), digits = 3, caption = "最终模型（只含主效应）")
+knitr::kable(head(vif_tab(m2), 4), digits = 3, caption = "最终模型（含交互，未中心化）")
+knitr::kable(head(vif_tab(m2_c), 4), digits = 3, caption = "最终模型（含交互，log 面积中心化）")
+c(max_abs_diff_fitted_centred_vs_not = max(abs(fitted(m2_c) - fitted(m2))))
+```
+
+主效应模型中最大的 GVIF^(1/(2Df)) 不到 2，没有需要处理的多重共线性；含交互时的大 GVIF 是结构性的，中心化后消失，
+而拟合值完全不变。
+
+## 最终模型的残差诊断
+
+```{r final-resid, fig.width = 12, fig.height = 7.6}
+e2 <- resid(m2); yhat2 <- fitted(m2); r2s <- rstandard(m2)
+draw_final <- function() {
+  par(mfrow = c(2, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(yhat2, train$log_price, pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted log price",
+       ylab = "Observed log price", main = "Condition 1: Y vs fitted", cex.main = 1)
+  abline(0, 1, lty = 2); lines(lowess(yhat2, train$log_price, f = 0.3), col = ln_col, lwd = 2)
+  plot(yhat2, e2, pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted log price", ylab = "Residual",
+       main = "Residuals vs fitted", cex.main = 1)
+  abline(h = 0, lty = 2); lines(lowess(yhat2, e2, f = 0.3), col = ln_col, lwd = 2)
+  plot(yhat2, sqrt(abs(r2s)), pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted log price",
+       ylab = "sqrt(|standardized residual|)", main = "Scale-location", cex.main = 1)
+  lines(lowess(yhat2, sqrt(abs(r2s)), f = 0.3), col = ln_col, lwd = 2)
+  qqnorm(r2s, pch = 16, cex = 0.4, col = pt_col, main = "Normal QQ", cex.main = 1)
+  qqline(r2s, col = ln_col, lwd = 2)
+  for (v in c("log_sqft", "lot_k")) {
+    plot(train[[v]], e2, pch = 16, cex = 0.4, col = pt_col, xlab = v, ylab = "Residual",
+         main = paste("Residuals vs", v), cex.main = 1)
+    abline(h = 0, lty = 2); lines(lowess(train[[v]], e2, f = 0.3), col = ln_col, lwd = 2)
+  }
+}
+fig_out("part2_final_residuals.png", 12, 7.6, draw_final)
+```
+
+```{r final-box, fig.width = 12, fig.height = 13}
+cat_fin <- c("division", "stories", "bedrooms", "fullbath", "halfbath", "garage", "foundation",
+             "fireplace", "wall", "heat_fuel")
+sd_ratio2 <- sapply(cat_fin, function(v) { s <- tapply(e2, train[[v]], sd); max(s) / min(s) })
+draw_final_box <- function() {
+  par(mfrow = c(4, 3), mar = c(6, 5, 3, 1))
+  for (v in cat_fin) {
+    boxplot(e2 ~ train[[v]], outline = FALSE, las = 2, cex.axis = 0.85, xlab = "", ylab = "",
+            col = "grey90", main = sprintf("Residuals by %s (SD ratio %.1f)", v, sd_ratio2[v]),
+            cex.main = 1)
+    abline(h = 0, col = ln_col, lty = 2)
+  }
+  hist(r2s, breaks = 80, col = "grey80", border = "white", xlab = "Standardized residual",
+       main = "Histogram of standardized residuals", cex.main = 1)
+}
+fig_out("part2_final_resid_by_categorical.png", 12, 13, draw_final_box)
+round(sd_ratio2, 2)
+```
+
+# 影响点与离群点（Part 1 模型 vs 最终模型）
+
+阈值：杠杆值 2p/n；标准化残差 |r| > 4（n 很大时课程用 4）；Cook's D > 4/n 和 > F(0.5; p, n−p)；
+|DFFITS| > 2√(p/n)；|DFBETAS| > 2/√n（只看面积与交互系数）。
+
+```{r influence}
+infl_table <- function(m, focal) {
+  N <- nobs(m); p <- length(coef(m))
+  h <- hatvalues(m); r <- rstandard(m); cd <- cooks.distance(m); dff <- dffits(m)
+  dfb <- dfbetas(m)[, focal, drop = FALSE]
+  base <- data.frame(
+    measure = c("leverage h_ii", "|standardized residual|", "Cook's D", "Cook's D", "|DFFITS|"),
+    cutoff_rule = c("2p/n", "4", "4/n", "F(0.5; p, n-p)", "2*sqrt(p/n)"),
+    cutoff = c(2 * p / N, 4, 4 / N, qf(0.5, p, N - p), 2 * sqrt(p / N)),
+    n_beyond = c(sum(h > 2 * p / N), sum(abs(r) > 4), sum(cd > 4 / N), sum(cd > qf(0.5, p, N - p)),
+                 sum(abs(dff) > 2 * sqrt(p / N))),
+    max_value = c(max(h), max(abs(r)), max(cd), max(cd), max(abs(dff))))
+  fb <- data.frame(measure = paste("|DFBETAS|", focal), cutoff_rule = "2/sqrt(n)",
+                   cutoff = 2 / sqrt(N), n_beyond = colSums(abs(dfb) > 2 / sqrt(N)),
+                   max_value = apply(abs(dfb), 2, max), row.names = NULL)
+  rbind(base, fb)
+}
+focal1 <- c("sqft100", paste0("sqft100:division", division_levels[-1]))
+focal2 <- c("log_sqft", paste0("log_sqft:division", division_levels[-1]))
+infl1 <- infl_table(m1, focal1); infl2 <- infl_table(m2, focal2)
+knitr::kable(infl1, digits = 4, caption = "Part 1 模型（原始售价）")
+knitr::kable(infl2, digits = 4, caption = "最终模型（log–log）")
+```
+
+```{r influence-plot, fig.width = 12, fig.height = 4}
+draw_infl <- function() {
+  N <- nobs(m2); p <- length(coef(m2))
+  par(mfrow = c(1, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(hatvalues(m2), rstandard(m2), pch = 16, cex = 0.4, col = pt_col, xlab = "Leverage",
+       ylab = "Standardized residual", main = "Leverage vs standardized residual", cex.main = 1)
+  abline(v = 2 * p / N, h = c(-4, 4), lty = 2, col = ln_col)
+  plot(cooks.distance(m2), type = "h", xlab = "Observation", ylab = "Cook's D",
+       main = "Cook's distance", cex.main = 1)
+  abline(h = 4 / N, lty = 2, col = ln_col)
+  plot(dffits(m2), type = "h", xlab = "Observation", ylab = "DFFITS", main = "DFFITS", cex.main = 1)
+  abline(h = c(-1, 1) * 2 * sqrt(p / N), lty = 2, col = ln_col)
+}
+fig_out("part2_final_influence.png", 12, 4, draw_infl)
+```
+
+没有任何点的 Cook's D 超过 F(0.5) 中位数阈值；最终模型最大 Cook's D 只有
+`r sprintf("%.3f", max(cooks.distance(m2)))`，所以**不删除任何点**。超过 4/n 的点很多是 n 很大时的正常现象。
+
+# 前后对比
+
+```{r before-after}
+gvif_max <- function(m) max(vif_tab(m)[, 3])
+ba_row <- function(m, m_noint, m_noX, int_term) {
+  e <- resid(m); bp <- bp_koenker(m); pf <- pf_test(m, m_noint); h3 <- hc3_test(m, m_noint)
+  c(coefficients = length(coef(m)), R2 = r2(m), adjR2 = adjr2(m), resid_skew = skew(e),
+    resid_exkurt = exkurt(e), BP_LM = unname(bp["LM"]), max_cooks_D = max(cooks.distance(m)),
+    n_abs_std_resid_gt4 = sum(abs(rstandard(m)) > 4), int_partialF_p = unname(pf["p"]),
+    int_HC3_p = unname(h3["p"]), dR2_X_and_XxG = r2(m) - r2(m_noX), dR2_interaction = unname(pf["dR2"]),
+    max_GVIF_adj_main_effects = gvif_max(m_noint))
+}
+before_after <- cbind(`Part 1 (raw price)` = ba_row(m1, m1_noint, m1_noX),
+                      `Part 2 final (log-log, BIC)` = ba_row(m2, m2_noint, m2_noX))
+ba_show <- apply(before_after, 2, function(x) formatC(x, digits = 4, format = "g"))
+rownames(ba_show) <- rownames(before_after)
+knitr::kable(ba_show, align = "r", caption = "Part 1 与 Part 2 最终模型对比（训练集）")
+```
+
+# 稳健标准误：HC3 与按 division 聚类
+
+聚类只有 9 个（division），聚类稳健 SE 的自由度最多 8，**结果不可靠，只作参考**。为与 Python（statsmodels，
+`cov_type = "cluster"` 默认用正态分布）对照，同时报告正态（z）p 值和更保守的 t(8) p 值。
+
+```{r robust-se}
+V_hc3 <- vcov_hc3(m2)
+V_cl <- vcovCL(m2, cluster = train$division, type = "HC1")   # G/(G-1) * (N-1)/(N-K) small-sample factor
+int_terms <- paste0("log_sqft:division", division_levels[-1])
+ct_ols <- coeftest(m2)[int_terms, ]
+ct_hc3 <- coeftest(m2, vcov. = V_hc3)[int_terms, ]
+ct_clz <- coeftest(m2, vcov. = V_cl, df = Inf)[int_terms, ]
+ct_clt <- coeftest(m2, vcov. = V_cl, df = 8)[int_terms, ]
+rob_tab <- data.frame(estimate = ct_ols[, 1], se_OLS = ct_ols[, 2], p_OLS = ct_ols[, 4],
+                      se_HC3 = ct_hc3[, 2], p_HC3 = ct_hc3[, 4], se_cluster = ct_clz[, 2],
+                      p_cluster_z = ct_clz[, 4], p_cluster_t8 = ct_clt[, 4])
+rob_show <- rob_tab
+for (j in grep("^p_", names(rob_show))) rob_show[[j]] <- fp(rob_show[[j]])
+knitr::kable(rob_show, digits = 4, caption = "交互系数（相对 South Atlantic）")
+# joint Wald chi-square with the cluster covariance (8 restrictions, rank <= 8: unreliable)
+b_int <- coef(m2)[int_terms]
+wald_cl <- drop(t(b_int) %*% solve(V_cl[int_terms, int_terms]) %*% b_int)
+c(cluster_joint_wald_chisq = wald_cl, df = 8)
+
+# residual clustering by division (ICC of residuals from a model WITHOUT division terms)
+c(ICC_part1_spec_without_division = icc_oneway(resid(update(m1, . ~ . - division - sqft100:division)),
+                                              train$division),
+  ICC_final_spec_without_division = icc_oneway(resid(update(m2, . ~ . - division - log_sqft:division)),
+                                              train$division))
+```
+
+说明：加入 division 固定效应后，残差在各 division 内的均值被强制为 0，所以"加入后 ICC ≈ 0"是**机械结果**，
+不能当作"误差不相关"的证据；上面报告的是不含 division 时的 ICC，它说明 division 吸收了明显的地区层面差异。
+楼盘/建造商层面的相关无法检验（公开文件没有这类 ID）。
+
+## 剩余异方差：两步 WLS（FGLS）
+
+```{r fgls}
+aux <- lm(abs(resid(m2)) ~ fitted(m2))
+w_fgls <- 1 / pmax(fitted(aux), 1e-3)^2
+m2w <- lm(f_final, data = train, weights = w_fgls)
+m2w_noint <- update(m2w, . ~ . - log_sqft:division)
+fgls_F <- anova(m2w_noint, m2w)
+bp_w <- bp_koenker(m2w, e = sqrt(w_fgls) * resid(m2w), X = model.matrix(m2w))
+c(F = fgls_F$F[2], p = fgls_F[2, "Pr(>F)"], BP_p_weighted_resid = unname(bp_w["p"]),
+  ENC_minus_SA = unname(coef(m2w)["log_sqft:divisionENCentral"]),
+  Pacific_minus_SA = unname(coef(m2w)["log_sqft:divisionPacific"]))
+```
+
+# 混杂检查：替代交互
+
+逐个加入 7 个"可能替代 面积 × division"的交互，再把其中 6 个同时加入（与 Python 探针的 `all` 定义一致，
+不含 division × fullbath），最后 R 额外加一个 7 个全部加入的版本。每一行报告：面积 × division 交互的
+partial F p、HC3 Wald p，以及 ENC − SA 和 Pacific − SA 两个交互系数（HC3 p）。
+
+```{r confounding}
+alts <- list(
+  division_x_lot     = "+ division:lot_k",
+  logsqft_x_stories  = "+ log_sqft:stories",
+  logsqft_x_garage   = "+ log_sqft:garage",
+  logsqft_x_fullbath = "+ log_sqft:fullbath",
+  logsqft_x_stage    = "+ log_sqft:stage + stage",
+  division_x_fullbath = "+ division:fullbath",
+  logsqft_x_lot      = "+ log_sqft:lot_k",
+  all_6_as_python    = "+ division:lot_k + log_sqft:stories + log_sqft:garage + log_sqft:fullbath + log_sqft:stage + stage + log_sqft:lot_k",
+  all_7_R_extra      = "+ division:lot_k + log_sqft:stories + log_sqft:garage + log_sqft:fullbath + log_sqft:stage + stage + log_sqft:lot_k + division:fullbath")
+conf_tab <- t(sapply(alts, function(extra) {
+  ma <- lm(as.formula(paste("log_price ~ log_sqft * division +", ctrl_fin, extra)), data = train)
+  mr <- update(ma, . ~ . - log_sqft:division)
+  ct <- coeftest(ma, vcov. = vcov_hc3(ma))
+  c(F_p = unname(pf_test(ma, mr)["p"]), HC3_p = unname(hc3_test(ma, mr)["p"]),
+    ENC_minus_SA = ct["log_sqft:divisionENCentral", 1], ENC_HC3_p = ct["log_sqft:divisionENCentral", 4],
+    Pac_minus_SA = ct["log_sqft:divisionPacific", 1], Pac_HC3_p = ct["log_sqft:divisionPacific", 4])
+}))
+conf_show <- data.frame(F_p = fp(conf_tab[, "F_p"]), HC3_p = fp(conf_tab[, "HC3_p"]),
+                        ENC_minus_SA = round(conf_tab[, "ENC_minus_SA"], 3),
+                        ENC_HC3_p = fp(conf_tab[, "ENC_HC3_p"]),
+                        Pac_minus_SA = round(conf_tab[, "Pac_minus_SA"], 3),
+                        Pac_HC3_p = fp(conf_tab[, "Pac_HC3_p"]), row.names = rownames(conf_tab))
+knitr::kable(conf_show, caption = "替代交互加入后的面积 × division 交互")
+```
+
+**结论**：面积 × division 交互在所有 9 个设定下都显著（HC3 p 最大为
+`r fp(max(conf_tab[, "HC3_p"]))`）。ENC − SA 在前 8 个设定（即 Python 探针检查过的设定）中稳定在
+`r sprintf("%.3f", min(conf_tab[1:8, "ENC_minus_SA"]))` 到 `r sprintf("%.3f", max(conf_tab[1:8, "ENC_minus_SA"]))`
+（HC3 p ≤ `r sprintf("%.3f", max(conf_tab[1:8, "ENC_HC3_p"]))`），但把 7 个替代交互**全部**加入后缩小到
+`r sprintf("%.3f", conf_tab["all_7_R_extra", "ENC_minus_SA"])`（HC3 p = `r sprintf("%.3f", conf_tab["all_7_R_extra", "ENC_HC3_p"])`）。
+Pacific − SA 在各设定下不稳定。因此报告时应把"交互整体显著"和下文的 1 自由度中西部对比作为主结论，
+单个 division 的差异只作描述。
+
+# 敏感性分析
+
+```{r sensitivity}
+# (a) drop houses whose price was top- or bottom-coded by the Census Bureau
+sub <- train[train$slpr_flag == 0, ]
+ma <- lm(f_final, data = sub); mr <- update(ma, . ~ . - log_sqft:division)
+sens_topcode <- c(n = nrow(sub), R2 = r2(ma), F_p = unname(pf_test(ma, mr)["p"]),
+                  HC3_p = unname(hc3_test(ma, mr)["p"]))
+# (b) survey-weighted least squares with the SOC sampling weight
+mw <- lm(f_final, data = train, weights = weight)
+mw_r <- update(mw, . ~ . - log_sqft:division)
+aw <- anova(mw_r, mw)
+sens_weight <- c(F = aw$F[2], F_p = aw[2, "Pr(>F)"], HC3_p = unname(hc3_test(mw, mw_r)["p"]),
+                 ENC_minus_SA = unname(coef(mw)["log_sqft:divisionENCentral"]),
+                 WNC_minus_SA = unname(coef(mw)["log_sqft:divisionWNCentral"]),
+                 Pacific_minus_SA = unname(coef(mw)["log_sqft:divisionPacific"]))
+# (c) the AIC-selected model instead of the BIC-selected one
+ma <- sel_aic; mr <- update(ma, . ~ . - log_sqft:division)
+sens_aic <- c(R2 = r2(ma), F_p = unname(pf_test(ma, mr)["p"]), HC3_p = unname(hc3_test(ma, mr)["p"]))
+list(exclude_topcoded = sens_topcode, sampling_weights = sens_weight, AIC_model = sens_aic)
+```
+
+# 1 自由度对比：中西部 vs 其他 division
+
+把"9 组弹性是否相同"（8 自由度）收窄为一个预先可以解释的对比：中西部（ENC + WNC）的面积弹性是否低于其他
+7 个 division。模型保留全部 division 主效应，只让面积斜率在"中西部 / 其他"之间不同。1 个自由度的检验在
+9 个聚类下仍可用聚类稳健 SE。
+
+```{r midwest}
+# numeric 0/1 indicator (a factor without its main effect would be dummy-coded in full and aliased)
+train$midwest <- as.numeric(train$division %in% c("ENCentral", "WNCentral"))
+m_mw <- lm(as.formula(paste("log_price ~ log_sqft + division + log_sqft:midwest +", ctrl_fin)),
+           data = train)
+tm <- "log_sqft:midwest"
+V_mw_cl <- vcovCL(m_mw, cluster = train$division, type = "HC1")
+mw_tab <- rbind(OLS = coeftest(m_mw)[tm, ],
+                HC3 = coeftest(m_mw, vcov. = vcov_hc3(m_mw))[tm, ],
+                cluster_z = coeftest(m_mw, vcov. = V_mw_cl, df = Inf)[tm, ],
+                cluster_t8 = coeftest(m_mw, vcov. = V_mw_cl, df = 8)[tm, ])
+mw_tab
+```
+
+# 2024 年独立样本复现
+
+2024 年签约的房子与 2025 年样本是不同的房子。用与 Part 1 **完全相同**的清洗与变量构造函数处理
+`data/original/soc24.csv`，写出 `data/cleaned/soc2024_clean.csv`，再拟合同一最终设定（以及 Part 1 设定）。
+
+```{r clean-2024}
+recode <- function(x, map) unname(map[as.character(x)])
+ym <- function(x) (x %/% 100) * 12 + x %% 100
+clean_soc <- function(raw, year) {          # identical to Part1_Code.Rmd
+  steps <- data.frame(step = character(0), rows_remaining = integer(0))
+  add <- function(label, d) { steps[nrow(steps) + 1, ] <<- list(label, nrow(d)); d }
+  s <- add(sprintf("All %d SOC records", year), raw)
+  s <- add("CAT = 1 (house built for sale)", s[s$CAT == 1, ])
+  s <- add(sprintf("Sales contract signed in %d", year),
+           s[s$SALE >= year * 100 + 1 & s$SALE <= year * 100 + 12, ])
+  s <- add("Sale price reported (SLPR > 0)", s[s$SLPR > 0, ])
+  s <- add("Detached (DET = 1) and not in a condominium project (CON = 2)", s[s$DET == 1 & s$CON == 2, ])
+  s <- add("Floor area and lot size reported (SQFS > 0, AREA > 0)", s[s$SQFS > 0 & s$AREA > 0, ])
+  valid <- list(STOR = 1:3, BEDR = 2:5, FULB = 1:4, HAFB = 0:2, GAR = 1:4, BASE = 1:4, FPLS = 0:2,
+                ASSOC = 1:2, AGER = 1:2, WAL1 = c(1, 2, 4:9), FUEL = 1:5, SEWER = 1:3)
+  ok <- rep(TRUE, nrow(s))
+  for (v in names(valid)) ok <- ok & s[[v]] %in% valid[[v]]
+  s <- add("No 'not reported' code in any categorical predictor", s[ok, ])
+  list(data = s, steps = steps)
+}
+construct_soc <- function(s) {              # identical to Part1_Code.Rmd
+  sale_m <- ym(s$SALE); strt_m <- ifelse(s$STRT > 0, ym(s$STRT), 1e9)
+  comp_m <- ifelse(s$COMP > 0, ym(s$COMP), 1e9)
+  data.frame(
+    id = s$ID, price_k = s$SLPR / 1000, sqft100 = s$SQFS / 100, lot_k = s$AREA / 1000,
+    division = recode(s$DIV, c("1" = "NewEngland", "2" = "MidAtlantic", "3" = "ENCentral",
+                               "4" = "WNCentral", "5" = "SouthAtlantic", "6" = "ESCentral",
+                               "7" = "WSCentral", "8" = "Mountain", "9" = "Pacific")),
+    stories = recode(s$STOR, c("1" = "1", "2" = "2", "3" = "3plus")),
+    bedrooms = recode(s$BEDR, c("2" = "2orless", "3" = "3", "4" = "4", "5" = "5plus")),
+    fullbath = recode(s$FULB, c("1" = "1orless", "2" = "2", "3" = "3", "4" = "4plus")),
+    halfbath = recode(s$HAFB, c("0" = "0", "1" = "1", "2" = "2plus")),
+    garage = recode(s$GAR, c("1" = "1car", "2" = "2car", "3" = "3plus", "4" = "other")),
+    foundation = recode(s$BASE, c("1" = "basement", "2" = "crawl", "3" = "slab", "4" = "other")),
+    fireplace = recode(s$FPLS, c("0" = "0", "1" = "1", "2" = "2plus")),
+    hoa = recode(s$ASSOC, c("1" = "yes", "2" = "no")),
+    age_restricted = recode(s$AGER, c("1" = "yes", "2" = "no")),
+    wall = recode(s$WAL1, c("1" = "wood", "2" = "brick", "4" = "stucco", "5" = "vinyl", "6" = "other",
+                            "7" = "stone", "8" = "fibercement", "9" = "other")),
+    heat_fuel = recode(s$FUEL, c("1" = "electric", "2" = "gas", "3" = "propane", "4" = "other",
+                                 "5" = "other")),
+    sewer = recode(s$SEWER, c("1" = "public", "2" = "septic", "3" = "septic")),
+    sale_month = s$SALE %% 100,
+    stage = ifelse(sale_m < strt_m, "not_started", ifelse(sale_m < comp_m, "under_constr", "completed")),
+    slpr_flag = s$SLPR_F, weight = s$WEIGHT, stringsAsFactors = FALSE)
+}
+cl24 <- clean_soc(read.csv("data/original/soc24.csv"), 2024)
+cl24$steps
+soc24 <- construct_soc(cl24$data)
+stopifnot(!anyNA(soc24))
+write.csv(soc24, "data/cleaned/soc2024_clean.csv", row.names = FALSE)
+d24 <- prep(soc24)
+nrow(d24)
+```
+
+```{r replicate-2024}
+m24 <- lm(f_final, data = d24); m24_noint <- update(m24, . ~ . - log_sqft:division)
+rep_final <- c(n = nobs(m24), R2 = r2(m24), F_p = unname(pf_test(m24, m24_noint)["p"]),
+               HC3_p = unname(hc3_test(m24, m24_noint)["p"]))
+el24 <- div_slopes(m24, "log_sqft")
+rep_final
+knitr::kable(cbind(elasticity_2025 = el[, "est"], elasticity_2024 = el24[, "est"],
+                   lower95_2024 = el24[, "lower"], upper95_2024 = el24[, "upper"]), digits = 3,
+             caption = "最终设定：2025 训练集与 2024 独立样本的面积弹性")
+# Part 1 specification (raw price) on 2024
+m24raw <- lm(f1, data = d24); m24raw_noint <- update(m24raw, . ~ . - sqft100:division)
+m24raw_noX <- update(m24raw, . ~ . - sqft100:division - sqft100)
+rep_raw <- c(n = nobs(m24raw), R2 = r2(m24raw), F = unname(pf_test(m24raw, m24raw_noint)["F"]),
+             F_p = unname(pf_test(m24raw, m24raw_noint)["p"]),
+             HC3_p = unname(hc3_test(m24raw, m24raw_noint)["p"]),
+             dR2_X_and_XxG = r2(m24raw) - r2(m24raw_noX))
+rep_raw
+round(div_slopes(m24raw, "sqft100")[, c("est", "lower", "upper")], 2)
+```
+
+结论：2024 年独立样本中，最终设定的交互依然高度显著（HC3 p = `r fp(rep_final["HC3_p"])`）；弹性最低的仍是
+ENC、WNC、Mountain，格局与 2025 年一致。
+
+# 小结
+
+* Part 1 的主要违反（右偏重尾、方差随均值增大、面积方向的弯曲）用 log(价格) ~ log(面积) 基本修正：残差偏度
+  `r sprintf("%.2f", skew(resid(m1)))` → `r sprintf("%.2f", skew(resid(m2)))`，超额峰度
+  `r sprintf("%.1f", exkurt(resid(m1)))` → `r sprintf("%.1f", exkurt(resid(m2)))`；残余的异方差用 HC3 处理。
+* BIC 后向选择删去 `r paste(hist_bic$dropped[-1], collapse = "、")`，最终模型 `r length(coef(m2))` 个系数，
+  R² = `r sprintf("%.3f", r2(m2))`。
+* 面积弹性在各 division 之间不同（交互 HC3 p = `r fp(p2_int_hc3["p"])`）：面积增加 10%，中西部（ENC、WNC）和
+  Mountain 的售价约增加 5.1%–5.7%，其余 division 约 6.2%–7.3%。中西部对比（1 自由度）HC3 p =
+  `r fp(mw_tab["HC3", 4])`，按 division 聚类的 t(8) p = `r fp(mw_tab["cluster_t8", 4])`。
+* 稳健性：去掉顶码、抽样权重、AIC 模型、2024 年独立样本下结论都不变；单个 division 的差异（尤其 Pacific）不稳，
+  不作为主结论。
+* 局限：楼盘/建造商层面的相关无法检验；地理只到 division；交互项自身的 ΔR² 只有
+  `r sprintf("%.3f", p2_int_F["dR2"])`；新英格兰训练样本只有 39 套；结论是关联而非因果。
+
+# 关键数值汇总（用于与 Python 核对）
+
+```{r key-results}
+KR <- list(
+  p1_R2 = r2(m1), p1_adjR2 = adjr2(m1), p1_sigma = summary(m1)$sigma,
+  p1_F = unname(summary(m1)$fstatistic[1]), p1_int_F = unname(p1_int_F["F"]),
+  p1_int_p = unname(p1_int_F["p"]), p1_int_hc3_p = unname(p1_int_hc3["p"]),
+  p1_dR2_int = unname(p1_int_F["dR2"]), p1_dR2_X = r2(m1) - r2(m1_noX),
+  boxcox_lambda_grid = lambda_hat, boxcox_lambda_exact = lambda_exact,
+  boxcox_ci_low = lambda_ci[1], boxcox_ci_high = lambda_ci[2],
+  sq_test_F = unname(sq_test["F"]), sq_test_p = unname(sq_test["p"]),
+  bic_drop_order = paste(hist_bic$dropped[-1], collapse = ", "),
+  aic_drop_order = paste(hist_aic$dropped[-1], collapse = ", "),
+  final_R2 = r2(m2), final_adjR2 = adjr2(m2), final_int_p = unname(p2_int_F["p"]),
+  final_int_hc3_p = unname(p2_int_hc3["p"]), final_dR2_X = unname(p2_X["dR2"]),
+  midwest_est = mw_tab["OLS", 1], midwest_p_hc3 = mw_tab["HC3", 4],
+  midwest_p_cluster_z = mw_tab["cluster_z", 4], midwest_p_cluster_t8 = mw_tab["cluster_t8", 4],
+  rep2024_n = unname(rep_final["n"]), rep2024_R2 = unname(rep_final["R2"]),
+  rep2024_HC3_p = unname(rep_final["HC3_p"]))
+str(KR)
+```
+
+# 测试集最终验证（只在 Part 2 最后运行一次）
+
+> **只在 Part 2 的模型全部定稿后运行一次。** 运行前不要改动上面的任何建模决定；运行后也不要再根据测试集结果
+> 回头修改模型。本代码块设为 `eval = FALSE`，knit 时不会执行。
+
+```{r test-set-final-validation, eval = FALSE}
+# ---- RUN ONCE, AT THE VERY END OF PART 2 ----
+soc_all <- read.csv("data/cleaned/soc_clean.csv", stringsAsFactors = FALSE)
+test <- prep(soc_all[soc_all$split == "test", ])
+nrow(test)                                   # expected 1,855
+
+# (1) out-of-sample prediction from the training-set final model
+pred <- predict(m2, newdata = test)
+rmse_test <- sqrt(mean((test$log_price - pred)^2))
+r2_test <- 1 - sum((test$log_price - pred)^2) / sum((test$log_price - mean(test$log_price))^2)
+c(RMSE_log_train = sqrt(mean(resid(m2)^2)), RMSE_log_test = rmse_test,
+  R2_train = r2(m2), R2_out_of_sample = r2_test)
+
+# (2) re-fit the same final specification on the test set: is the interaction still there?
+m_test <- lm(f_final, data = test)
+m_test_noint <- update(m_test, . ~ . - log_sqft:division)
+rbind(partial_F = pf_test(m_test, m_test_noint)[c("F", "df", "p")],
+      HC3_Wald = hc3_test(m_test, m_test_noint))
+cbind(elasticity_train = el[, "est"], elasticity_test = div_slopes(m_test, "log_sqft")[, "est"])
+```
+
+```{r session}
+sessionInfo()
+```

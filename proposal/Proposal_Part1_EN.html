@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Does Extra Floor Space Cost the Same Everywhere? Floor Area, Census Division and the Sale Price of New U.S. Homes</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="proposal.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Does Extra Floor Space Cost the Same Everywhere? Floor
+Area, Census Division and the Sale Price of New U.S. Homes</h1>
+<p class="subtitle">STA302H1 Fall 2026 Final Project, Part 1: Research
+Proposal. Group [##]</p>
+</header>
+<h2 id="contributions">Contributions</h2>
+<p>Haiwen Yi — [contribution]; [Member 2] — [contribution]; [Member 3] —
+[contribution]; [Member 4] — [contribution].</p>
+<h2 id="introduction">Introduction</h2>
+<p><strong>Research question.</strong> Among newly built, detached
+single-family homes sold in the United States in 2025, how much does an
+extra 100 square feet of finished floor area add to the sale price (in
+$1000s, including the lot), and does this marginal price of floor area
+differ across the nine Census divisions, holding constant lot size,
+bedrooms, full and half bathrooms, stories, garage, foundation,
+fireplaces, exterior wall material, heating fuel, sewer type,
+homeowners’ association and age-restricted status, construction stage at
+sale, and month of sale?</p>
+<p><strong>Why a linear model.</strong> Comparing average price per
+square foot across divisions is simpler, but it mixes floor area with
+everything that comes with bigger homes, such as extra bathrooms,
+garages and basements. Multiple linear regression holds these features
+fixed and, through a floor area × division interaction, lets the
+floor-area slope differ by division. The answer comes from the eight
+interaction coefficients and the partial F test of whether they are all
+zero, and from each division’s floor-area slope with its 95% confidence
+interval.</p>
+<p><strong>Literature.</strong> Rosen (1974) showed that the price of a
+differentiated good can be written as a function of its characteristics;
+regressing price on characteristics recovers their implicit prices,
+which are market equilibrium outcomes and so may differ between markets.
+Our floor-area slope is the implicit price of space, and the interaction
+asks whether it is equal across divisions. Gyourko and Saiz (2006) found
+that construction costs make up most of the price of new houses in most
+markets and differ substantially across U.S. markets with local wages,
+unionization, topography and regulation. Because extra floor area is
+mostly extra structure, this predicts that the price of space varies by
+region. Glaeser, Gyourko and Saks (2005) found Manhattan prices more
+than twice supply costs and argued that land-use regulation also
+constrains supply in several other U.S. markets, where rising demand
+raises prices rather than the number of homes; this suggests steeper
+price–area slopes in tightly regulated regions. None of these three
+studies uses a national sample of individual new homes to compare the
+adjusted price of floor area across all nine divisions; that is our
+contribution.</p>
+<p><strong>Who benefits.</strong> Home builders choosing house sizes by
+region, housing agencies and municipalities weighing minimum-size rules
+or starter-home policies, and appraisers and buyers who need a
+region-specific value for extra space.</p>
+<h2 id="data-description">Data description</h2>
+<p>The data are the 2025 microdata file of the U.S. Census Bureau’s
+Survey of Construction (U.S. Census Bureau, 2026). This national survey
+samples about 1 in 50 new houses from building permits and canvassed
+areas, and interviews builders or owners about dates and over 40
+characteristics. It produces official statistics on new residential
+construction and sales; HUD funds the collection of the characteristics
+(U.S. Census Bureau, n.d.).</p>
+<p>We kept homes built for sale, detached and outside condominiums, with
+a 2025 sales contract and all model variables reported (6,185 of 25,246
+records). All summaries and models use a random 70% training set (n =
+4,330).</p>
+<p>The response, sale price, is continuous (nearest $100; mean $527k,
+median $433k, SD $307k). It is strongly right-skewed with high outliers,
+and 7.1% of prices were top- or bottom-coded by the Census Bureau, so we
+expect non-normal, unequal-variance errors. Each row is a different
+house from a probability sample, so independence is plausible, although
+homes in the same subdivision cannot be identified.</p>
+<table>
+<caption>Table 1. Training-set summary (n = 4,330). Price and lot size
+are strongly right-skewed with high outliers; lot size is capped at
+87,120 sq ft (93 homes). Some levels are rare (New England 39 homes).
+Nothing is missing: homes with unreported values were removed during
+cleaning (130 of them for categorical codes).</caption>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 21%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Variable</th>
+<th style="text-align: left;">Type (reference level)</th>
+<th style="text-align: left;">Training-set summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Sale price, $1000s (response)</td>
+<td style="text-align: left;">Numerical</td>
+<td style="text-align: left;">Mean 527, SD 307, min 210, median 433, max
+3,300; skewness 3.04</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area, 100 sq ft</td>
+<td style="text-align: left;">Numerical</td>
+<td style="text-align: left;">Mean 25.4, SD 9.9, min 7.1, median 23.0,
+max 85.1; skewness 1.67</td>
+</tr>
+<tr>
+<td style="text-align: left;">Lot size, 1000 sq ft</td>
+<td style="text-align: left;">Numerical</td>
+<td style="text-align: left;">Mean 14.1, SD 16.6, min 2.0, median 8.7,
+max 87.1; skewness 3.10</td>
+</tr>
+<tr>
+<td style="text-align: left;">Month of sale (1–12)</td>
+<td style="text-align: left;">Numerical</td>
+<td style="text-align: left;">Mean 6.3, SD 3.4, min 1, median 6, max 12;
+skewness 0.09</td>
+</tr>
+<tr>
+<td style="text-align: left;">Census division</td>
+<td style="text-align: left;">9 levels (South Atlantic)</td>
+<td style="text-align: left;">South Atlantic 1,308; New England 39;
+Middle Atlantic 119; East North Central 510; West North Central 313;
+East South Central 344; West South Central 850; Mountain 473; Pacific
+374</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stories</td>
+<td style="text-align: left;">3 (one)</td>
+<td style="text-align: left;">1: 2,120; 2: 2,116; 3+: 94</td>
+</tr>
+<tr>
+<td style="text-align: left;">Bedrooms</td>
+<td style="text-align: left;">4 (two or fewer)</td>
+<td style="text-align: left;">≤2: 154; 3: 1,780; 4: 1,777; 5+: 619</td>
+</tr>
+<tr>
+<td style="text-align: left;">Full bathrooms</td>
+<td style="text-align: left;">4 (one or fewer)</td>
+<td style="text-align: left;">≤1: 46; 2: 2,664; 3: 1,203; 4+: 417</td>
+</tr>
+<tr>
+<td style="text-align: left;">Half bathrooms</td>
+<td style="text-align: left;">3 (none)</td>
+<td style="text-align: left;">0: 2,373; 1: 1,897; 2+: 60</td>
+</tr>
+<tr>
+<td style="text-align: left;">Garage</td>
+<td style="text-align: left;">4 (one-car)</td>
+<td style="text-align: left;">1-car: 158; 2-car: 3,124; 3+-car: 919;
+other: 129</td>
+</tr>
+<tr>
+<td style="text-align: left;">Foundation</td>
+<td style="text-align: left;">4 (basement)</td>
+<td style="text-align: left;">Basement: 992; crawl space: 403; slab:
+2,926; other: 9</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fireplaces</td>
+<td style="text-align: left;">3 (none)</td>
+<td style="text-align: left;">0: 2,781; 1: 1,383; 2+: 166</td>
+</tr>
+<tr>
+<td style="text-align: left;">Homeowners’ association</td>
+<td style="text-align: left;">2 (no)</td>
+<td style="text-align: left;">No: 1,109; yes: 3,221</td>
+</tr>
+<tr>
+<td style="text-align: left;">Age-restricted community</td>
+<td style="text-align: left;">2 (no)</td>
+<td style="text-align: left;">No: 4,216; yes: 114</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall material</td>
+<td style="text-align: left;">7 (brick)</td>
+<td style="text-align: left;">Brick 897; wood 169; stucco 906; vinyl
+1,362; stone 56; fiber cement 926; other 14</td>
+</tr>
+<tr>
+<td style="text-align: left;">Heating fuel</td>
+<td style="text-align: left;">4 (electricity)</td>
+<td style="text-align: left;">Electricity 2,147; natural gas 2,083;
+propane 52; other 48</td>
+</tr>
+<tr>
+<td style="text-align: left;">Sewer</td>
+<td style="text-align: left;">2 (public)</td>
+<td style="text-align: left;">Public 3,893; septic or other 437</td>
+</tr>
+<tr>
+<td style="text-align: left;">Construction stage at sale</td>
+<td style="text-align: left;">3 (completed)</td>
+<td style="text-align: left;">Completed 2,452; under construction 1,344;
+not started 534</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interaction.</strong> Following the three papers above, the
+price of floor area should differ by region. Figure 1 supports this:
+within-division slopes range from about $13k per 100 sq ft (East North
+Central) to $32k (Middle Atlantic).</p>
+<figure>
+<img src="../figures/fig1_interaction.png"
+alt="Figure 1. Training set. (a) Price against floor area with one least-squares line per division; (b) within-division slopes with 95% confidence intervals." />
+<figcaption aria-hidden="true">Figure 1. Training set. (a) Price against
+floor area with one least-squares line per division; (b) within-division
+slopes with 95% confidence intervals.</figcaption>
+</figure>
+<h2 id="ethics-discussion">Ethics discussion</h2>
+<p><strong>Trustworthiness.</strong> The data come from a federal
+statistical agency, use a documented probability sampling design, and
+are released with full documentation, sampling weights and a flag on
+every value altered for confidentiality. Ownership and origin are clear:
+the Census Bureau collects the data, HUD funds the collection, and the
+files are free to the public. The producer discloses the main
+limitations (top- and bottom-coding, geography limited to nine
+divisions), and we report them.</p>
+<p><strong>Ethical collection and use.</strong> Respondents are builders
+or owners reporting facts about a house, not personal attributes of
+occupants. The public file contains no addresses or builder names, and
+extreme prices and floor areas are top- and bottom-coded to prevent
+disclosure. We use only the public file and make no attempt to identify
+houses or builders. Our results describe associations among new homes
+sold in 2025; we will not present them as causal effects or as
+appraisals of individual homes, and we will note that each division
+contains very different local markets.</p>
+<h2 id="preliminary-results">Preliminary results</h2>
+<p>We fitted the preliminary model by least squares on the training set:
+sale price on floor area, division, their interaction and the other 15
+predictors (17 predictors, 52 coefficients). It explains most of the
+variation (R² = 0.713, adjusted R² = 0.710). The eight interaction
+coefficients are jointly significant (partial F(8, 4278) = 37.3, p &lt;
+0.001) and add 0.020 to R².</p>
+<table>
+<caption>Table 2. Adjusted slope of price ($1000s) per extra 100 sq ft
+by division. All 52 coefficients are in Appendix A.</caption>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 7%" />
+<col style="width: 20%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Division</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">Slope</th>
+<th style="text-align: right;">SE</th>
+<th style="text-align: left;">95% CI</th>
+<th style="text-align: left;">Difference from South Atlantic (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">South Atlantic (reference)</td>
+<td style="text-align: right;">1,308</td>
+<td style="text-align: right;">11.83</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: left;">(10.60, 13.07)</td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;">New England</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">19.26</td>
+<td style="text-align: right;">2.15</td>
+<td style="text-align: left;">(15.05, 23.47)</td>
+<td style="text-align: left;">7.43 (2.17)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Middle Atlantic</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">24.56</td>
+<td style="text-align: right;">1.14</td>
+<td style="text-align: left;">(22.32, 26.79)</td>
+<td style="text-align: left;">12.72 (1.21)</td>
+</tr>
+<tr>
+<td style="text-align: left;">East North Central</td>
+<td style="text-align: right;">510</td>
+<td style="text-align: right;">6.85</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: left;">(5.19, 8.51)</td>
+<td style="text-align: left;">−4.98 (0.91)</td>
+</tr>
+<tr>
+<td style="text-align: left;">West North Central</td>
+<td style="text-align: right;">313</td>
+<td style="text-align: right;">10.57</td>
+<td style="text-align: right;">1.15</td>
+<td style="text-align: left;">(8.32, 12.82)</td>
+<td style="text-align: left;">−1.26 (1.20)</td>
+</tr>
+<tr>
+<td style="text-align: left;">East South Central</td>
+<td style="text-align: right;">344</td>
+<td style="text-align: right;">13.78</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: left;">(11.88, 15.68)</td>
+<td style="text-align: left;">1.95 (1.00)</td>
+</tr>
+<tr>
+<td style="text-align: left;">West South Central</td>
+<td style="text-align: right;">850</td>
+<td style="text-align: right;">9.27</td>
+<td style="text-align: right;">0.79</td>
+<td style="text-align: left;">(7.71, 10.82)</td>
+<td style="text-align: left;">−2.57 (0.82)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Mountain</td>
+<td style="text-align: right;">473</td>
+<td style="text-align: right;">14.60</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: left;">(13.03, 16.17)</td>
+<td style="text-align: left;">2.77 (0.87)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Pacific</td>
+<td style="text-align: right;">374</td>
+<td style="text-align: right;">21.70</td>
+<td style="text-align: right;">1.14</td>
+<td style="text-align: left;">(19.47, 23.92)</td>
+<td style="text-align: left;">9.86 (1.17)</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="../figures/fig2_conditions.png"
+alt="Figure 2. Condition 1 (observed against fitted price) and Condition 2 (pairs of numerical predictors), with LOWESS curves." />
+<figcaption aria-hidden="true">Figure 2. Condition 1 (observed against
+fitted price) and Condition 2 (pairs of numerical predictors), with
+LOWESS curves.</figcaption>
+</figure>
+<figure>
+<img src="../figures/fig3_residuals.png"
+alt="Figure 3. Residuals against fitted values, scale-location and normal QQ plots (top); residuals against each numerical predictor (bottom)." />
+<figcaption aria-hidden="true">Figure 3. Residuals against fitted
+values, scale-location and normal QQ plots (top); residuals against each
+numerical predictor (bottom).</figcaption>
+</figure>
+<p><strong>Assumptions.</strong> Condition 1 holds approximately: prices
+scatter around one increasing curve but spread out at high fitted values
+(Figure 2). Condition 2 holds: numerical predictors show no curved
+patterns (|r| ≤ 0.22). Residual plots (Figures 3–4) then show:</p>
+<ul>
+<li><em>Linearity:</em> mildly violated; residuals against fitted values
+and floor area bend slightly.</li>
+<li><em>Constant variance:</em> violated; residuals fan out as fitted
+values grow, the scale-location trend rises, and residual SDs differ
+five-fold across divisions.</li>
+<li><em>Normality:</em> violated; the QQ plot has a long upper tail
+(skewness 2.0, excess kurtosis 18; 36 standardized residuals beyond ±4),
+partly from top-coded prices.</li>
+<li><em>Uncorrelated errors:</em> plausible by design (one sampled house
+per row, no trend across sale months), but same-subdivision homes cannot
+be checked.</li>
+</ul>
+<p>We do not correct these violations yet.</p>
+<figure>
+<img src="../figures/fig4_resid_by_categorical.png"
+alt="Figure 4. Residuals by level of each categorical predictor, and histogram of standardized residuals." />
+<figcaption aria-hidden="true">Figure 4. Residuals by level of each
+categorical predictor, and histogram of standardized
+residuals.</figcaption>
+</figure>
+<p><strong>Comparison with the literature.</strong> As Gyourko and Saiz
+(2006) and Glaeser et al. (2005) suggest, the price of space varies
+widely: 100 extra square feet add about $7k in East North Central but
+$22k–$25k in the Pacific and Middle Atlantic divisions. Two results are
+surprising. Lot size is not significant (p = 0.28) although land is part
+of the price, perhaps because large lots are mostly in cheaper rural
+areas. Holding floor area fixed, more bedrooms lower the price (5+
+against ≤2: −$76k), consistent with smaller rooms. The New England and
+Middle Atlantic slopes rest on few homes.</p>
+<h2 id="plan">Plan</h2>
+<p><strong>Predictors.</strong> Floor area, division and their
+interaction must stay because they answer the research question; lot
+size stays because hedonic theory treats land as part of the price
+(Rosen, 1974). For the other 14 predictors we will use partial F tests
+and backward selection by AIC and BIC with the required terms fixed, and
+use context from the literature, such as features tied to construction
+cost, to settle close calls. A predictor will be dropped only if
+removing it lowers the chosen criterion and its partial F test is not
+significant at the 5% level; where AIC and BIC disagree we will prefer
+the simpler model if adjusted R² barely changes. We will check
+multicollinearity with generalized variance inflation factors.</p>
+<p><strong>Assumptions.</strong> We will redraw the full set of residual
+plots after every change (after transforming, after variable selection
+and for the final model), and each time check leverage, standardized
+residuals, Cook’s distance, DFFITS and DFBETAS.</p>
+<p><strong>Transformations.</strong> Right skew, variance growing with
+the mean and the curved floor-area pattern point to a Box-Cox power
+transformation of price. We will compare the suggested power with the
+log, which reads as a percentage effect, and try log floor area so that
+the slope becomes an elasticity. If unequal variance remains, we will
+add heteroscedasticity-consistent (HC3) standard errors. We will also
+check the results without top-coded prices and with the survey’s
+sampling weights, and evaluate the final model only once, at the end, on
+the 30% held-out test set.</p>
+<table>
+<caption>Table 3. Gantt chart of the remaining work (dates are
+targets).</caption>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 20%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Lead</th>
+<th style="text-align: center;">Nov 9–15</th>
+<th style="text-align: center;">Nov 16–22</th>
+<th style="text-align: center;">Nov 23–29</th>
+<th style="text-align: center;">Nov 30–Dec 6</th>
+<th style="text-align: center;">Final due date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Transformations; re-check assumptions</td>
+<td style="text-align: left;">Haiwen Yi, [Member 2]</td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Variable selection, VIF, influence
+diagnostics</td>
+<td style="text-align: left;">[Member 3], [Member 4]</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Final model, robustness checks, one-time
+test-set check</td>
+<td style="text-align: left;">All</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Poster (figures and text)</td>
+<td style="text-align: left;">[Member 2], [Member 3]</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Record presentation</td>
+<td style="text-align: left;">All</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">■</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Final review and submission</td>
+<td style="text-align: left;">Haiwen Yi</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">■</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bibliography">Bibliography</h2>
+<p>Fox, J., &amp; Weisberg, S. (2019). <em>An R companion to applied
+regression</em> (3rd ed.). Sage.</p>
+<p>Glaeser, E. L., Gyourko, J., &amp; Saks, R. (2005). Why is Manhattan
+so expensive? Regulation and the rise in housing prices. <em>The Journal
+of Law and Economics, 48</em>(2), 331–369.
+https://doi.org/10.1086/429979</p>
+<p>Gyourko, J., &amp; Saiz, A. (2006). Construction costs and the supply
+of housing structure. <em>Journal of Regional Science, 46</em>(4),
+661–680. https://doi.org/10.1111/j.1467-9787.2006.00472.x</p>
+<p>R Core Team. (2025). <em>R: A language and environment for
+statistical computing</em> (Version 4.4.3) [Computer software]. R
+Foundation for Statistical Computing. https://www.R-project.org/</p>
+<p>Rosen, S. (1974). Hedonic prices and implicit markets: Product
+differentiation in pure competition. <em>Journal of Political Economy,
+82</em>(1), 34–55. https://doi.org/10.1086/260169</p>
+<p>U.S. Census Bureau. (2026). <em>Survey of Construction (SOC)
+microdata: 2025 annual file</em> [Data set].
+https://www.census.gov/construction/chars/microdata.html</p>
+<p>U.S. Census Bureau. (n.d.). <em>Survey of Construction microdata
+files: General information and variable descriptions</em>
+[Documentation].
+https://www.census.gov/construction/chars/pdf/socmicro_info.pdf</p>
+<h2 id="appendix-a.-all-coefficients-of-the-preliminary-model">Appendix
+A. All coefficients of the preliminary model</h2>
+<table>
+<caption>Table A1. Ordinary least squares estimates for the preliminary
+model (response: sale price in $1000s; training set, n = 4,330; R² =
+0.713). Reference levels are listed in Table 1. Code:
+Part1_Code.Rmd.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Term</th>
+<th style="text-align: right;">Estimate</th>
+<th style="text-align: right;">SE</th>
+<th style="text-align: left;">95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Intercept</td>
+<td style="text-align: right;">127.03</td>
+<td style="text-align: right;">35.11</td>
+<td style="text-align: left;">(58.20, 195.86)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area (per 100 sq ft)</td>
+<td style="text-align: right;">11.83</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: left;">(10.60, 13.07)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: New England</td>
+<td style="text-align: right;">355.76</td>
+<td style="text-align: right;">76.85</td>
+<td style="text-align: left;">(205.09, 506.43)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: Middle Atlantic</td>
+<td style="text-align: right;">−76.08</td>
+<td style="text-align: right;">40.73</td>
+<td style="text-align: left;">(−155.92, 3.77)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: East North Central</td>
+<td style="text-align: right;">145.53</td>
+<td style="text-align: right;">25.92</td>
+<td style="text-align: left;">(94.71, 196.35)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: West North Central</td>
+<td style="text-align: right;">34.89</td>
+<td style="text-align: right;">32.17</td>
+<td style="text-align: left;">(−28.18, 97.96)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: East South Central</td>
+<td style="text-align: right;">−39.31</td>
+<td style="text-align: right;">27.28</td>
+<td style="text-align: left;">(−92.79, 14.18)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: West South Central</td>
+<td style="text-align: right;">33.91</td>
+<td style="text-align: right;">23.00</td>
+<td style="text-align: left;">(−11.17, 79.00)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: Mountain</td>
+<td style="text-align: right;">81.27</td>
+<td style="text-align: right;">25.37</td>
+<td style="text-align: left;">(31.53, 131.01)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Division: Pacific</td>
+<td style="text-align: right;">−61.96</td>
+<td style="text-align: right;">30.57</td>
+<td style="text-align: left;">(−121.89, −2.03)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Lot size (per 1000 sq ft)</td>
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: left;">(−0.17, 0.60)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stories: 2</td>
+<td style="text-align: right;">−32.17</td>
+<td style="text-align: right;">7.01</td>
+<td style="text-align: left;">(−45.91, −18.43)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stories: 3+</td>
+<td style="text-align: right;">211.47</td>
+<td style="text-align: right;">19.53</td>
+<td style="text-align: left;">(173.17, 249.76)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Bedrooms: 3</td>
+<td style="text-align: right;">−35.26</td>
+<td style="text-align: right;">15.73</td>
+<td style="text-align: left;">(−66.10, −4.42)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Bedrooms: 4</td>
+<td style="text-align: right;">−54.27</td>
+<td style="text-align: right;">16.67</td>
+<td style="text-align: left;">(−86.95, −21.59)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Bedrooms: 5+</td>
+<td style="text-align: right;">−76.19</td>
+<td style="text-align: right;">19.06</td>
+<td style="text-align: left;">(−113.56, −38.81)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Full bathrooms: 2</td>
+<td style="text-align: right;">49.28</td>
+<td style="text-align: right;">27.39</td>
+<td style="text-align: left;">(−4.41, 102.97)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Full bathrooms: 3</td>
+<td style="text-align: right;">122.62</td>
+<td style="text-align: right;">28.57</td>
+<td style="text-align: left;">(66.62, 178.63)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Full bathrooms: 4+</td>
+<td style="text-align: right;">312.07</td>
+<td style="text-align: right;">30.78</td>
+<td style="text-align: left;">(251.71, 372.42)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Half bathrooms: 1</td>
+<td style="text-align: right;">48.75</td>
+<td style="text-align: right;">6.81</td>
+<td style="text-align: left;">(35.41, 62.09)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Half bathrooms: 2+</td>
+<td style="text-align: right;">172.85</td>
+<td style="text-align: right;">23.90</td>
+<td style="text-align: left;">(125.99, 219.72)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Garage: 2-car</td>
+<td style="text-align: right;">−60.46</td>
+<td style="text-align: right;">14.35</td>
+<td style="text-align: left;">(−88.59, −32.32)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Garage: 3+-car</td>
+<td style="text-align: right;">−33.40</td>
+<td style="text-align: right;">16.08</td>
+<td style="text-align: left;">(−64.92, −1.88)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Garage: other</td>
+<td style="text-align: right;">−44.13</td>
+<td style="text-align: right;">20.08</td>
+<td style="text-align: left;">(−83.50, −4.75)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Foundation: crawl space</td>
+<td style="text-align: right;">91.67</td>
+<td style="text-align: right;">11.23</td>
+<td style="text-align: left;">(69.64, 113.69)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Foundation: slab</td>
+<td style="text-align: right;">−3.26</td>
+<td style="text-align: right;">8.64</td>
+<td style="text-align: left;">(−20.19, 13.68)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Foundation: other</td>
+<td style="text-align: right;">36.24</td>
+<td style="text-align: right;">57.46</td>
+<td style="text-align: left;">(−76.42, 148.90)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fireplaces: 1</td>
+<td style="text-align: right;">77.14</td>
+<td style="text-align: right;">6.53</td>
+<td style="text-align: left;">(64.33, 89.95)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fireplaces: 2+</td>
+<td style="text-align: right;">93.55</td>
+<td style="text-align: right;">14.50</td>
+<td style="text-align: left;">(65.13, 121.98)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Homeowners’ association: yes</td>
+<td style="text-align: right;">−11.59</td>
+<td style="text-align: right;">6.65</td>
+<td style="text-align: left;">(−24.62, 1.44)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Age-restricted: yes</td>
+<td style="text-align: right;">27.14</td>
+<td style="text-align: right;">16.95</td>
+<td style="text-align: left;">(−6.10, 60.37)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: wood</td>
+<td style="text-align: right;">19.68</td>
+<td style="text-align: right;">15.69</td>
+<td style="text-align: left;">(−11.08, 50.44)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: stucco</td>
+<td style="text-align: right;">25.70</td>
+<td style="text-align: right;">11.07</td>
+<td style="text-align: left;">(4.00, 47.39)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: vinyl</td>
+<td style="text-align: right;">−31.32</td>
+<td style="text-align: right;">9.71</td>
+<td style="text-align: left;">(−50.36, −12.28)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: stone</td>
+<td style="text-align: right;">13.42</td>
+<td style="text-align: right;">23.28</td>
+<td style="text-align: left;">(−32.22, 59.05)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: fiber cement</td>
+<td style="text-align: right;">15.60</td>
+<td style="text-align: right;">9.46</td>
+<td style="text-align: left;">(−2.94, 34.14)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Exterior wall: other</td>
+<td style="text-align: right;">52.35</td>
+<td style="text-align: right;">45.44</td>
+<td style="text-align: left;">(−36.74, 141.44)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Heating fuel: gas</td>
+<td style="text-align: right;">21.83</td>
+<td style="text-align: right;">6.80</td>
+<td style="text-align: left;">(8.51, 35.16)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Heating fuel: propane</td>
+<td style="text-align: right;">−61.53</td>
+<td style="text-align: right;">26.73</td>
+<td style="text-align: left;">(−113.94, −9.13)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Heating fuel: other</td>
+<td style="text-align: right;">9.10</td>
+<td style="text-align: right;">25.77</td>
+<td style="text-align: left;">(−41.41, 59.62)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Sewer: septic or other</td>
+<td style="text-align: right;">−13.59</td>
+<td style="text-align: right;">10.66</td>
+<td style="text-align: left;">(−34.49, 7.32)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stage at sale: under construction</td>
+<td style="text-align: right;">−1.83</td>
+<td style="text-align: right;">5.81</td>
+<td style="text-align: left;">(−13.22, 9.57)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stage at sale: not started</td>
+<td style="text-align: right;">15.31</td>
+<td style="text-align: right;">8.38</td>
+<td style="text-align: left;">(−1.11, 31.74)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Month of sale</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: left;">(−0.02, 2.90)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × New England</td>
+<td style="text-align: right;">7.43</td>
+<td style="text-align: right;">2.17</td>
+<td style="text-align: left;">(3.17, 11.68)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × Middle Atlantic</td>
+<td style="text-align: right;">12.72</td>
+<td style="text-align: right;">1.21</td>
+<td style="text-align: left;">(10.36, 15.09)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × East North Central</td>
+<td style="text-align: right;">−4.98</td>
+<td style="text-align: right;">0.91</td>
+<td style="text-align: left;">(−6.76, −3.21)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × West North Central</td>
+<td style="text-align: right;">−1.26</td>
+<td style="text-align: right;">1.20</td>
+<td style="text-align: left;">(−3.62, 1.10)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × East South Central</td>
+<td style="text-align: right;">1.95</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">(−0.02, 3.91)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × West South Central</td>
+<td style="text-align: right;">−2.57</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: left;">(−4.18, −0.96)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × Mountain</td>
+<td style="text-align: right;">2.77</td>
+<td style="text-align: right;">0.87</td>
+<td style="text-align: left;">(1.06, 4.47)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Floor area × Pacific</td>
+<td style="text-align: right;">9.86</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: left;">(7.56, 12.16)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

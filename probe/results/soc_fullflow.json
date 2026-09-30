@@ -1,0 +1,1280 @@
+{
+  "raw_shape": [
+    25246,
+    61
+  ],
+  "raw_profile_sold2025": {
+    "n_sold_2025": 8901,
+    "SLPR_not_reported(0)": 369,
+    "SLPR_top_or_bottom_coded(SLPR_F=1)": 611,
+    "SLPR_min": 209900.0,
+    "SLPR_max": 3300000.0,
+    "SQFS_not_reported(0)": 66,
+    "SQFS_coded(SQFS_F=1)": 21,
+    "AREA_not_reported(0)": 1803,
+    "AREA_coded(AREA_F=1)": 376,
+    "AREA_at_topcode_87120": 149,
+    "AREA_at_bottomcode_2000": 244,
+    "attached_or_condo": 1514,
+    "STOR_not_reported": 46,
+    "BEDR_not_reported": 110,
+    "FULB_not_reported": 107,
+    "HAFB_not_reported": 92,
+    "GAR_not_reported": 63,
+    "BASE_not_reported": 24,
+    "FPLS_not_reported": 156,
+    "ASSOC_not_reported": 56,
+    "AGER_not_reported": 4,
+    "WAL1_not_reported": 126,
+    "FUEL_not_reported": 138,
+    "SEWER_not_reported": 22,
+    "FINC_not_reported": 3219,
+    "ACS_not_reported": 67
+  },
+  "variable_table": [
+    {
+      "var": "price_k",
+      "type": "numeric",
+      "mean": 526.9679076212472,
+      "sd": 307.41343348593614,
+      "min": 209.9,
+      "median": 433.0,
+      "max": 3300.0,
+      "skew": 3.04344955605323,
+      "n_missing": 0.0,
+      "levels": NaN
+    },
+    {
+      "var": "sqft100",
+      "type": "numeric",
+      "mean": 25.44808545034642,
+      "sd": 9.945592067713099,
+      "min": 7.11,
+      "median": 23.0,
+      "max": 85.07,
+      "skew": 1.6731462863931128,
+      "n_missing": 0.0,
+      "levels": NaN
+    },
+    {
+      "var": "lot_k",
+      "type": "numeric",
+      "mean": 14.06419399538106,
+      "sd": 16.561092482325588,
+      "min": 2.0,
+      "median": 8.7,
+      "max": 87.12,
+      "skew": 3.1012018674161137,
+      "n_missing": 0.0,
+      "levels": NaN
+    },
+    {
+      "var": "sale_month",
+      "type": "numeric",
+      "mean": 6.282678983833718,
+      "sd": 3.415616471419311,
+      "min": 1.0,
+      "median": 6.0,
+      "max": 12.0,
+      "skew": 0.09453101614826194,
+      "n_missing": 0.0,
+      "levels": NaN
+    },
+    {
+      "var": "division",
+      "type": "categorical (9 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "SouthAtlantic: 1308; WSCentral: 850; ENCentral: 510; Mountain: 473; Pacific: 374; ESCentral: 344; WNCentral: 313; MidAtlantic: 119; NewEngland: 39"
+    },
+    {
+      "var": "stories",
+      "type": "categorical (3 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "1: 2120; 2: 2116; 3plus: 94"
+    },
+    {
+      "var": "bedrooms",
+      "type": "categorical (4 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "3: 1780; 4: 1777; 5plus: 619; 2orless: 154"
+    },
+    {
+      "var": "fullbath",
+      "type": "categorical (4 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "2: 2664; 3: 1203; 4plus: 417; 1orless: 46"
+    },
+    {
+      "var": "halfbath",
+      "type": "categorical (3 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "0: 2373; 1: 1897; 2plus: 60"
+    },
+    {
+      "var": "garage",
+      "type": "categorical (4 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "2car: 3124; 3plus: 919; 1car: 158; other: 129"
+    },
+    {
+      "var": "foundation",
+      "type": "categorical (4 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "slab: 2926; basement: 992; crawl: 403; other: 9"
+    },
+    {
+      "var": "fireplace",
+      "type": "categorical (3 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "0: 2781; 1: 1383; 2plus: 166"
+    },
+    {
+      "var": "hoa",
+      "type": "categorical (2 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "yes: 3221; no: 1109"
+    },
+    {
+      "var": "age_restricted",
+      "type": "categorical (2 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "no: 4216; yes: 114"
+    },
+    {
+      "var": "wall",
+      "type": "categorical (7 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "vinyl: 1362; fibercement: 926; stucco: 906; brick: 897; wood: 169; stone: 56; other: 14"
+    },
+    {
+      "var": "heat_fuel",
+      "type": "categorical (4 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "electric: 2147; gas: 2083; propane: 52; other: 48"
+    },
+    {
+      "var": "sewer",
+      "type": "categorical (2 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "public: 3893; septic: 437"
+    },
+    {
+      "var": "stage",
+      "type": "categorical (3 levels)",
+      "mean": NaN,
+      "sd": NaN,
+      "min": NaN,
+      "median": NaN,
+      "max": NaN,
+      "skew": NaN,
+      "n_missing": NaN,
+      "levels": "completed: 2452; under_constr: 1344; not_started: 534"
+    }
+  ],
+  "part1": {
+    "formula": "price_k ~ sqft100 * division + lot_k + C(stories) + C(bedrooms) + C(fullbath) + C(halfbath) + C(garage) + C(foundation) + C(fireplace) + C(hoa) + C(age_restricted) + C(wall) + C(heat_fuel) + C(sewer) + C(stage) + sale_month",
+    "k_params": 52,
+    "diag": {
+      "n": 4330,
+      "k_params": 52,
+      "R2": 0.7132610036080191,
+      "adjR2": 0.7098426565262073,
+      "resid_se": 165.59210418590217,
+      "F": 208.65669475259014,
+      "F_p": 0.0,
+      "resid_skew": 2.0445145432931358,
+      "resid_exkurt": 18.00496765358256,
+      "BP_LM": 1280.5839070188488,
+      "BP_p": 1.6158892355528184e-234,
+      "max_cooks": 0.184495787472619,
+      "n_cooks_gt_4n": 313,
+      "n_cooks_gt_0.5": 0,
+      "max_leverage": 0.36382343843525,
+      "n_lev_gt_2pn": 349
+    },
+    "boxcox": {
+      "lambda": -0.41999999999999854,
+      "ci95": [
+        -0.4699999999999982,
+        -0.3749999999999981
+      ]
+    },
+    "resid_vs_sqft_lowess_note": "see soc_part1_grid.png panel 4"
+  },
+  "part2_transform_candidates": {
+    "log_price ~ sqft100": {
+      "R2": 0.7456665290898155,
+      "adjR2": 0.7426345031392734,
+      "BIC": -157.01773030002727,
+      "skew": 0.5483476813398743,
+      "exkurt": 2.6423859747427,
+      "BP_p": 1.351359830933818e-79
+    },
+    "log_price ~ log_sqft": {
+      "R2": 0.7572827054277691,
+      "adjR2": 0.7543891612428266,
+      "BIC": -359.4405292209157,
+      "skew": 0.48058320070390914,
+      "exkurt": 2.594059276437118,
+      "BP_p": 3.060888686141897e-79
+    }
+  },
+  "part2_sqft_squared_test": {
+    "F": 228.26330740919317,
+    "p": 2.7719888080202197e-50,
+    "coef": -0.00033361432914999923
+  },
+  "part2_backward_BIC": {
+    "kept": [
+      "C(stories)",
+      "C(bedrooms)",
+      "C(fullbath)",
+      "C(halfbath)",
+      "C(garage)",
+      "C(foundation)",
+      "C(fireplace)",
+      "C(wall)",
+      "C(heat_fuel)"
+    ],
+    "history": [
+      {
+        "step": 0,
+        "dropped": null,
+        "BIC": -359.4405292209157,
+        "R2": 0.7572827054277691,
+        "adjR2": 0.7543891612428266
+      },
+      {
+        "step": 1,
+        "dropped": "C(hoa)",
+        "BIC": -367.7887691708254,
+        "partialF_p_of_dropped": 0.8749196287069773,
+        "df": 1,
+        "R2": 0.7572812994083133,
+        "adjR2": 0.754445137915071
+      },
+      {
+        "step": 2,
+        "dropped": "C(age_restricted)",
+        "BIC": -373.86607565205634,
+        "partialF_p_of_dropped": 0.13200990602526522,
+        "df": 1,
+        "R2": 0.7571525617913848,
+        "adjR2": 0.7543722990642301
+      },
+      {
+        "step": 3,
+        "dropped": "C(sewer)",
+        "BIC": -379.382463740932,
+        "partialF_p_of_dropped": 0.09288699677696735,
+        "df": 1,
+        "R2": 0.7569922781388184,
+        "adjR2": 0.7542675945019727
+      },
+      {
+        "step": 4,
+        "dropped": "sale_month",
+        "BIC": -384.8791701835992,
+        "partialF_p_of_dropped": 0.0917309749806438,
+        "df": 1,
+        "R2": 0.7568307833937231,
+        "adjR2": 0.7541617144585304
+      },
+      {
+        "step": 5,
+        "dropped": "C(stage)",
+        "BIC": -387.3309163929888,
+        "partialF_p_of_dropped": 0.0008517504122939582,
+        "df": 2,
+        "R2": 0.7560266670622742,
+        "adjR2": 0.7534639219683905
+      }
+    ]
+  },
+  "part2_backward_AIC": {
+    "kept": [
+      "C(stories)",
+      "C(bedrooms)",
+      "C(fullbath)",
+      "C(halfbath)",
+      "C(garage)",
+      "C(foundation)",
+      "C(fireplace)",
+      "C(age_restricted)",
+      "C(wall)",
+      "C(heat_fuel)",
+      "C(sewer)",
+      "C(stage)",
+      "sale_month"
+    ],
+    "history": [
+      {
+        "step": 0,
+        "dropped": null,
+        "AIC": -690.8533159127355,
+        "R2": 0.7572827054277691,
+        "adjR2": 0.7543891612428266
+      },
+      {
+        "step": 1,
+        "dropped": "C(hoa)",
+        "AIC": -692.8282330416487,
+        "partialF_p_of_dropped": 0.8749196287069773,
+        "df": 1,
+        "R2": 0.7572812994083133,
+        "adjR2": 0.754445137915071
+      }
+    ]
+  },
+  "final": {
+    "formula": "log_price ~ log_sqft * division + lot_k + C(stories) + C(bedrooms) + C(fullbath) + C(halfbath) + C(garage) + C(foundation) + C(fireplace) + C(wall) + C(heat_fuel)",
+    "k_params": 46,
+    "diag": {
+      "n": 4330,
+      "k_params": 46,
+      "R2": 0.7560266670622742,
+      "adjR2": 0.7534639219683905,
+      "resid_se": 0.2225058230653899,
+      "F": 295.0065805868209,
+      "F_p": 0.0,
+      "resid_skew": 0.47653556869966784,
+      "resid_exkurt": 2.5190075187173937,
+      "BP_LM": 483.8654308546414,
+      "BP_p": 6.958746666615848e-75,
+      "max_cooks": 0.021796726070835812,
+      "n_cooks_gt_4n": 291,
+      "n_cooks_gt_0.5": 0,
+      "max_leverage": 0.19907371838018242,
+      "n_lev_gt_2pn": 414,
+      "icc": {
+        "division": {
+          "icc": -0.0022456753246180732,
+          "n_groups": 9,
+          "mean_size": 481.1111111111111,
+          "F": 1.2139098759269248e-23,
+          "p": 1.0
+        }
+      }
+    },
+    "gvif_top": [
+      {
+        "term": "division",
+        "df": 8,
+        "GVIF": 3.4919291693578427e+21,
+        "GVIF_adj": 22.204530212469727
+      },
+      {
+        "term": "log_sqft:division",
+        "df": 8,
+        "GVIF": 3.439848870175907e+21,
+        "GVIF_adj": 22.183686039267226
+      },
+      {
+        "term": "log_sqft",
+        "df": 1,
+        "GVIF": 6.694532828768649,
+        "GVIF_adj": 2.5873795293247275
+      },
+      {
+        "term": "C(fullbath)",
+        "df": 3,
+        "GVIF": 4.209754177651407,
+        "GVIF_adj": 1.2706992963527928
+      }
+    ],
+    "gvif_main_effects_top": [
+      {
+        "term": "log_sqft",
+        "df": 1,
+        "GVIF": 3.54021950411773,
+        "GVIF_adj": 1.8815471038796052
+      },
+      {
+        "term": "C(fullbath)",
+        "df": 3,
+        "GVIF": 3.890581395373024,
+        "GVIF_adj": 1.2541103468567947
+      },
+      {
+        "term": "C(stories)",
+        "df": 2,
+        "GVIF": 2.083412902379178,
+        "GVIF_adj": 1.2014171782677772
+      },
+      {
+        "term": "C(bedrooms)",
+        "df": 3,
+        "GVIF": 2.8736172834608045,
+        "GVIF_adj": 1.192352924330287
+      }
+    ],
+    "interaction_partialF": {
+      "F": 7.08777862210933,
+      "p": 2.3898307086270724e-09,
+      "df_num": 8,
+      "delta_R2": 0.0032291857582834593
+    },
+    "interaction_wald_hc3": {
+      "F": 7.847102834629185,
+      "p": 1.5981750543341617e-10,
+      "df_num": 8,
+      "terms": [
+        "log_sqft:division[T.NewEngland]",
+        "log_sqft:division[T.MidAtlantic]",
+        "log_sqft:division[T.ENCentral]",
+        "log_sqft:division[T.WNCentral]",
+        "log_sqft:division[T.ESCentral]",
+        "log_sqft:division[T.WSCentral]",
+        "log_sqft:division[T.Mountain]",
+        "log_sqft:division[T.Pacific]"
+      ]
+    },
+    "dR2_X_and_XxG": 0.07615111647667816,
+    "slopes": {
+      "SouthAtlantic": {
+        "est": 0.6785964488542211,
+        "se": 0.024820755102636458,
+        "ci_low": 0.6299349144366796,
+        "ci_high": 0.7272579832717626,
+        "p": 7.775808044590441e-152,
+        "se_hc3": 0.028145360175935764,
+        "ci_low_hc3": 0.6234169667138925,
+        "ci_high_hc3": 0.7337759309945497,
+        "p_hc3": 1.5030359097203013e-120,
+        "pct_per_10pct_more_sqft": 6.681454722844182,
+        "n_train": 1308,
+        "p10_p90_within_group": {
+          "x_p10": 7.3777589082278725,
+          "x_p90": 8.294049640102028,
+          "delta_y": 0.6217916367678369,
+          "delta_y_in_sd": 1.3875343285660338
+        }
+      },
+      "NewEngland": {
+        "est": 0.6315006687071214,
+        "se": 0.09345804956109792,
+        "ci_low": 0.4482744905949736,
+        "ci_high": 0.8147268468192692,
+        "p": 1.5974830044494408e-11,
+        "se_hc3": 0.09670518980106269,
+        "ci_low_hc3": 0.4419084140637707,
+        "ci_high_hc3": 0.8210929233504721,
+        "p_hc3": 7.336092407001358e-11,
+        "pct_per_10pct_more_sqft": 6.203666030062283,
+        "n_train": 39,
+        "p10_p90_within_group": {
+          "x_p10": 7.527364038132487,
+          "x_p90": 8.416228457102166,
+          "delta_y": 0.5613184749693194,
+          "delta_y_in_sd": 1.2525878561616441
+        }
+      },
+      "MidAtlantic": {
+        "est": 0.7349812854368367,
+        "se": 0.052009070465949866,
+        "ci_low": 0.6330165723554714,
+        "ci_high": 0.8369459985182021,
+        "p": 2.3657723263991034e-44,
+        "se_hc3": 0.08388200858269602,
+        "ci_low_hc3": 0.5705291069764882,
+        "ci_high_hc3": 0.8994334638971853,
+        "p_hc3": 2.7165348905898912e-18,
+        "pct_per_10pct_more_sqft": 7.256309343549616,
+        "n_train": 119,
+        "p10_p90_within_group": {
+          "x_p10": 7.3777589082278725,
+          "x_p90": 8.411832675758411,
+          "delta_y": 0.7600248668961082,
+          "delta_y_in_sd": 1.6960031802034834
+        }
+      },
+      "ENCentral": {
+        "est": 0.5252625456955867,
+        "se": 0.032482475375137376,
+        "ci_low": 0.4615800716170162,
+        "ci_high": 0.5889450197741573,
+        "p": 3.873812001304411e-57,
+        "se_hc3": 0.02957417733282786,
+        "ci_low_hc3": 0.46728184195789035,
+        "ci_high_hc3": 0.5832432494332831,
+        "p_hc3": 3.7364693389182975e-68,
+        "pct_per_10pct_more_sqft": 5.133718942289378,
+        "n_train": 510,
+        "p10_p90_within_group": {
+          "x_p10": 7.313220387090301,
+          "x_p90": 8.1886891244442,
+          "delta_y": 0.4598509376594102,
+          "delta_y_in_sd": 1.0261620200336463
+        }
+      },
+      "WNCentral": {
+        "est": 0.5349965788659281,
+        "se": 0.037312237970296994,
+        "ci_low": 0.46184526881596727,
+        "ci_high": 0.6081478889158889,
+        "p": 1.4079742607399687e-45,
+        "se_hc3": 0.04075314775452557,
+        "ci_low_hc3": 0.455099303626733,
+        "ci_high_hc3": 0.6148938541051232,
+        "p_hc3": 1.2598706196381638e-38,
+        "pct_per_10pct_more_sqft": 5.231302267378202,
+        "n_train": 313,
+        "p10_p90_within_group": {
+          "x_p10": 7.24422751560335,
+          "x_p90": 8.160518247477505,
+          "delta_y": 0.4902124067992304,
+          "delta_y_in_sd": 1.0939139456082392
+        }
+      },
+      "ESCentral": {
+        "est": 0.7018373403999437,
+        "se": 0.037418667569935386,
+        "ci_low": 0.6284773732158855,
+        "ci_high": 0.775197307584002,
+        "p": 1.6867948776863613e-75,
+        "se_hc3": 0.04102936505974945,
+        "ci_low_hc3": 0.6213985361923795,
+        "ci_high_hc3": 0.7822761446075079,
+        "p_hc3": 1.6555732701118343e-63,
+        "pct_per_10pct_more_sqft": 6.918026042393954,
+        "n_train": 344,
+        "p10_p90_within_group": {
+          "x_p10": 7.3777589082278725,
+          "x_p90": 8.1886891244442,
+          "delta_y": 0.5691411061992192,
+          "delta_y_in_sd": 1.27004413689842
+        }
+      },
+      "WSCentral": {
+        "est": 0.733800585611017,
+        "se": 0.029163582474582235,
+        "ci_low": 0.676624860438379,
+        "ci_high": 0.790976310783655,
+        "p": 2.044756945389628e-130,
+        "se_hc3": 0.028699610856655303,
+        "ci_low_hc3": 0.6775344850956931,
+        "ci_high_hc3": 0.7900666861263409,
+        "p_hc3": 2.5631226819523885e-134,
+        "pct_per_10pct_more_sqft": 7.244240179206285,
+        "n_train": 850,
+        "p10_p90_within_group": {
+          "x_p10": 7.3777589082278725,
+          "x_p90": 8.216088098632316,
+          "delta_y": 0.6151664508535902,
+          "delta_y_in_sd": 1.3727501591665638
+        }
+      },
+      "Mountain": {
+        "est": 0.5841956468999525,
+        "se": 0.031144206422098843,
+        "ci_low": 0.5231368730452037,
+        "ci_high": 0.6452544207547013,
+        "p": 1.6456477538133596e-75,
+        "se_hc3": 0.03229320367846626,
+        "ci_low_hc3": 0.5208842433687422,
+        "ci_high_hc3": 0.6475070504311629,
+        "p_hc3": 1.5095933636629666e-70,
+        "pct_per_10pct_more_sqft": 5.725908686648062,
+        "n_train": 473,
+        "p10_p90_within_group": {
+          "x_p10": 7.3777589082278725,
+          "x_p90": 8.338020293955648,
+          "delta_y": 0.5609805214282824,
+          "delta_y_in_sd": 1.251833709415498
+        }
+      },
+      "Pacific": {
+        "est": 0.7272406113217621,
+        "se": 0.03936948951330158,
+        "ci_low": 0.6500560228178824,
+        "ci_high": 0.8044251998256418,
+        "p": 2.2823655435089203e-73,
+        "se_hc3": 0.038910772732624783,
+        "ci_low_hc3": 0.6509553452727597,
+        "ci_high_hc3": 0.8035258773707645,
+        "p_hc3": 5.339013228136789e-75,
+        "pct_per_10pct_more_sqft": 7.1772085704930655,
+        "n_train": 374,
+        "p10_p90_within_group": {
+          "x_p10": 7.332581943431573,
+          "x_p90": 8.101677747454572,
+          "delta_y": 0.5593177026826875,
+          "delta_y_in_sd": 1.2481231125607555
+        }
+      }
+    }
+  },
+  "final_wls": {
+    "interaction_F": 7.440678187278117,
+    "interaction_p": 6.819259731440069e-10,
+    "BP_p_weighted_resid": 3.082347126600901e-35,
+    "pacific_minus_SA": 0.04067865691423084,
+    "ENC_minus_SA": -0.10986932341571425
+  },
+  "final_influence": {
+    "max_cook": 0.021796726070835812,
+    "n_cook_gt_4n": 291,
+    "n_cook_gt_0.5": 0
+  },
+  "part1_course_checks": {
+    "cond1_corr_y_fitted": 0.8445478101374833,
+    "cond1_lowess_max_dev_from_identity": 0.5133130870309125,
+    "cond2_pairs": {
+      "sqft100~lot_k": {
+        "pearson": 0.2199657805711425,
+        "spearman": 0.2225989242092484
+      },
+      "sqft100~sale_month": {
+        "pearson": 0.002726098782542583,
+        "spearman": -0.005545432294851177
+      },
+      "lot_k~sale_month": {
+        "pearson": -0.011985564945610278,
+        "spearman": -0.013145322163791913
+      }
+    },
+    "resid_vs_numeric": {
+      "sqft100": {
+        "lowess_max_abs_over_resid_sd": 0.5887864427684487
+      },
+      "lot_k": {
+        "lowess_max_abs_over_resid_sd": 0.21751246823829898
+      },
+      "sale_month": {
+        "lowess_max_abs_over_resid_sd": 0.13151751842075135
+      }
+    },
+    "resid_by_categorical": {
+      "division": {
+        "max_sd_ratio": 4.976502258053348,
+        "levene_p": 1.7636825179369237e-96
+      },
+      "stories": {
+        "max_sd_ratio": 4.466450155375493,
+        "levene_p": 6.52410838982185e-85
+      },
+      "bedrooms": {
+        "max_sd_ratio": 2.6256695676180972,
+        "levene_p": 2.1726962854782096e-50
+      },
+      "fullbath": {
+        "max_sd_ratio": 3.000851693724036,
+        "levene_p": 7.903960182746919e-114
+      },
+      "halfbath": {
+        "max_sd_ratio": 3.5123922170847863,
+        "levene_p": 6.6882594432866355e-43
+      },
+      "garage": {
+        "max_sd_ratio": 2.3419290933160504,
+        "levene_p": 1.6016634296688707e-21
+      },
+      "foundation": {
+        "max_sd_ratio": 1.9940222356370934,
+        "levene_p": 6.458709083234457e-26
+      },
+      "fireplace": {
+        "max_sd_ratio": 1.881261750329378,
+        "levene_p": 6.333618762633415e-40
+      },
+      "hoa": {
+        "max_sd_ratio": 1.5698136184217073,
+        "levene_p": 8.52846107173514e-11
+      },
+      "age_restricted": {
+        "max_sd_ratio": 1.327116376120156,
+        "levene_p": 0.5097188711165914
+      },
+      "wall": {
+        "max_sd_ratio": 1.7982071211591568,
+        "levene_p": 7.153202632558314e-15
+      },
+      "heat_fuel": {
+        "max_sd_ratio": 1.846472092143588,
+        "levene_p": 1.54395634049234e-08
+      },
+      "sewer": {
+        "max_sd_ratio": 1.2175853613108758,
+        "levene_p": 0.6680065315788419
+      },
+      "stage": {
+        "max_sd_ratio": 1.079440218798505,
+        "levene_p": 0.0004560293860968623
+      }
+    },
+    "n": 4330,
+    "p": 52,
+    "leverage": {
+      "cut_2p_over_n": 0.02401847575057737,
+      "n_above": 349,
+      "max": 0.36382343843525
+    },
+    "std_resid": {
+      "cut": 4,
+      "n_outliers": 36,
+      "max_abs": 12.055705691370395
+    },
+    "cooks": {
+      "cut_4_over_n": 0.0009237875288683603,
+      "n_above_4n": 313,
+      "cut_F50": 0.9873631554646282,
+      "n_above_F50": 0,
+      "max": 0.184495787472619
+    },
+    "dffits": {
+      "cut_2sqrt_p_over_n": 0.21917333665652566,
+      "n_above": 313,
+      "max_abs": 3.116709123961594
+    },
+    "dfbetas": {
+      "cut": 0.030393873212678245,
+      "focal": {
+        "sqft100": {
+          "n_above_2_over_sqrt_n": 239,
+          "max_abs": 0.2747588927706437
+        },
+        "sqft100:division[T.NewEngland]": {
+          "n_above_2_over_sqrt_n": 64,
+          "max_abs": 2.2658025303602227
+        },
+        "sqft100:division[T.MidAtlantic]": {
+          "n_above_2_over_sqrt_n": 124,
+          "max_abs": 2.632012595372899
+        },
+        "sqft100:division[T.ENCentral]": {
+          "n_above_2_over_sqrt_n": 161,
+          "max_abs": 0.5939509016932912
+        },
+        "sqft100:division[T.WNCentral]": {
+          "n_above_2_over_sqrt_n": 136,
+          "max_abs": 0.3849483747939605
+        },
+        "sqft100:division[T.ESCentral]": {
+          "n_above_2_over_sqrt_n": 137,
+          "max_abs": 0.38207585090587165
+        },
+        "sqft100:division[T.WSCentral]": {
+          "n_above_2_over_sqrt_n": 172,
+          "max_abs": 0.2601588774634304
+        },
+        "sqft100:division[T.Mountain]": {
+          "n_above_2_over_sqrt_n": 181,
+          "max_abs": 0.5887307228631609
+        },
+        "sqft100:division[T.Pacific]": {
+          "n_above_2_over_sqrt_n": 141,
+          "max_abs": 0.3481273883705336
+        }
+      }
+    }
+  },
+  "final_course_checks": {
+    "cond1_corr_y_fitted": 0.8694979396538413,
+    "cond1_lowess_max_dev_from_identity": 0.09764760629007263,
+    "cond2_pairs": {
+      "log_sqft~lot_k": {
+        "pearson": 0.20253619608943982,
+        "spearman": 0.2225989242092484
+      }
+    },
+    "resid_vs_numeric": {
+      "log_sqft": {
+        "lowess_max_abs_over_resid_sd": 0.408139625540009
+      },
+      "lot_k": {
+        "lowess_max_abs_over_resid_sd": 0.17028437989718653
+      }
+    },
+    "resid_by_categorical": {
+      "division": {
+        "max_sd_ratio": 2.226567900144217,
+        "levene_p": 2.4920705800485858e-29
+      },
+      "stories": {
+        "max_sd_ratio": 2.060117961269551,
+        "levene_p": 1.2528898144612563e-25
+      },
+      "bedrooms": {
+        "max_sd_ratio": 1.2561066895445958,
+        "levene_p": 1.548108379285749e-05
+      },
+      "fullbath": {
+        "max_sd_ratio": 1.4674702881102983,
+        "levene_p": 5.096589819100966e-28
+      },
+      "halfbath": {
+        "max_sd_ratio": 1.3801883327737965,
+        "levene_p": 2.9424448188390337e-12
+      },
+      "garage": {
+        "max_sd_ratio": 1.4304047549803045,
+        "levene_p": 0.00011877344344412121
+      },
+      "foundation": {
+        "max_sd_ratio": 1.4934092487584436,
+        "levene_p": 3.273196230974798e-08
+      },
+      "fireplace": {
+        "max_sd_ratio": 1.25388528462473,
+        "levene_p": 4.077878793866913e-09
+      },
+      "wall": {
+        "max_sd_ratio": 1.2402013110245327,
+        "levene_p": 1.9144334519803053e-08
+      },
+      "heat_fuel": {
+        "max_sd_ratio": 1.5739732494304595,
+        "levene_p": 0.04536098076645362
+      }
+    },
+    "n": 4330,
+    "p": 46,
+    "leverage": {
+      "cut_2p_over_n": 0.021247113163972285,
+      "n_above": 414,
+      "max": 0.19907371838018242
+    },
+    "std_resid": {
+      "cut": 4,
+      "n_outliers": 17,
+      "max_abs": 6.900130497517774
+    },
+    "cooks": {
+      "cut_4_over_n": 0.0009237875288683603,
+      "n_above_4n": 291,
+      "cut_F50": 0.9856987662278571,
+      "n_above_F50": 0,
+      "max": 0.021796726070835812
+    },
+    "dffits": {
+      "cut_2sqrt_p_over_n": 0.20614127759365558,
+      "n_above": 291,
+      "max_abs": 1.006817397387919
+    },
+    "dfbetas": {
+      "cut": 0.030393873212678245,
+      "focal": {
+        "log_sqft": {
+          "n_above_2_over_sqrt_n": 266,
+          "max_abs": 0.2043677840081271
+        },
+        "log_sqft:division[T.NewEngland]": {
+          "n_above_2_over_sqrt_n": 53,
+          "max_abs": 0.6311488071677319
+        },
+        "log_sqft:division[T.MidAtlantic]": {
+          "n_above_2_over_sqrt_n": 106,
+          "max_abs": 0.5925596140384132
+        },
+        "log_sqft:division[T.ENCentral]": {
+          "n_above_2_over_sqrt_n": 187,
+          "max_abs": 0.2714972011875755
+        },
+        "log_sqft:division[T.WNCentral]": {
+          "n_above_2_over_sqrt_n": 173,
+          "max_abs": 0.21020356890248285
+        },
+        "log_sqft:division[T.ESCentral]": {
+          "n_above_2_over_sqrt_n": 140,
+          "max_abs": 0.29453117274525864
+        },
+        "log_sqft:division[T.WSCentral]": {
+          "n_above_2_over_sqrt_n": 197,
+          "max_abs": 0.2391486025174127
+        },
+        "log_sqft:division[T.Mountain]": {
+          "n_above_2_over_sqrt_n": 194,
+          "max_abs": 0.2521564159945414
+        },
+        "log_sqft:division[T.Pacific]": {
+          "n_above_2_over_sqrt_n": 143,
+          "max_abs": 0.2490981702051211
+        }
+      }
+    }
+  },
+  "final_confounding": {
+    "division_x_lot": {
+      "F_p": 8.130492048614513e-11,
+      "HC3_p": 4.622460172988762e-12,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.06582864553622618,
+        "se": 0.04340469003388605,
+        "p": 0.12943526632877247,
+        "ci_low": -0.01926707077030297,
+        "ci_high": 0.15092436184275532,
+        "se_hc3": 0.044160898334692146,
+        "p_hc3": 0.13612596524136614
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.1564531450133154,
+        "se": 0.03495115987388895,
+        "p": 7.791145726369718e-06,
+        "ci_low": -0.224975555446166,
+        "ci_high": -0.08793073458046481,
+        "se_hc3": 0.032547371601950974,
+        "p_hc3": 1.5852239278499696e-06
+      }
+    },
+    "logsqft_x_stories": {
+      "F_p": 3.3270525815653226e-09,
+      "HC3_p": 2.0044544195737464e-10,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.05416911849956453,
+        "se": 0.04160614556605548,
+        "p": 0.19300353196960077,
+        "ci_low": -0.027400484976168177,
+        "ci_high": 0.13573872197529724,
+        "se_hc3": 0.042059792187647,
+        "p_hc3": 0.1978477868141713
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.15031793184470724,
+        "se": 0.03473628532302594,
+        "p": 1.5431906215299685e-05,
+        "ci_low": -0.21841904963560396,
+        "ci_high": -0.08221681405381051,
+        "se_hc3": 0.032251894105520984,
+        "p_hc3": 3.246402585309323e-06
+      }
+    },
+    "logsqft_x_garage": {
+      "F_p": 1.1590090048148955e-07,
+      "HC3_p": 3.844816732574045e-09,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.05784119917441618,
+        "se": 0.04146763545078305,
+        "p": 0.16313294904580902,
+        "ci_low": -0.02345685807592684,
+        "ci_high": 0.1391392564247592,
+        "se_hc3": 0.041828609391763236,
+        "p_hc3": 0.16679393541305873
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.13905181414454867,
+        "se": 0.03485383675126832,
+        "p": 6.729954011071243e-05,
+        "ci_low": -0.20738339815689955,
+        "ci_high": -0.07072023013219782,
+        "se_hc3": 0.03168786981301905,
+        "p_hc3": 1.1705970940579138e-05
+      }
+    },
+    "logsqft_x_fullbath": {
+      "F_p": 7.821088202876991e-09,
+      "HC3_p": 5.345164082652191e-10,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.04118105687902817,
+        "se": 0.04159148850163028,
+        "p": 0.32216564253208413,
+        "ci_low": -0.04035981654129777,
+        "ci_high": 0.1227219302993541,
+        "se_hc3": 0.042607153613238705,
+        "p_hc3": 0.33383405392887966
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.14941774150291953,
+        "se": 0.03473433775396159,
+        "p": 1.7324909433385436e-05,
+        "ci_low": -0.21751504554683737,
+        "ci_high": -0.08132043745900168,
+        "se_hc3": 0.0319431217734143,
+        "p_hc3": 2.9917467382654127e-06
+      }
+    },
+    "logsqft_x_stage": {
+      "F_p": 2.6437094120173213e-09,
+      "HC3_p": 3.630502081858565e-10,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.054095192338927824,
+        "se": 0.04178234092675699,
+        "p": 0.1954969216379679,
+        "ci_low": -0.02781985616192153,
+        "ci_high": 0.13601024083977717,
+        "se_hc3": 0.042789311517935066,
+        "p_hc3": 0.20621917111888755
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.14889090020408005,
+        "se": 0.03491738486365533,
+        "p": 2.0504627946975338e-05,
+        "ci_low": -0.2173470759756359,
+        "ci_high": -0.08043472443252418,
+        "se_hc3": 0.03242454708344097,
+        "p_hc3": 4.517951036373996e-06
+      }
+    },
+    "division_x_fullbath": {
+      "F_p": 2.3054209783154867e-10,
+      "HC3_p": 2.3586533508675692e-08,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.11713075123943517,
+        "se": 0.054902989239024716,
+        "p": 0.032947825199250255,
+        "ci_low": 0.009492294433318463,
+        "ci_high": 0.2247692080455519,
+        "se_hc3": 0.06172124601256683,
+        "p_hc3": 0.057798138228848384
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.11427378641745405,
+        "se": 0.045929481019246904,
+        "p": 0.012883332278518709,
+        "ci_low": -0.20431949298717134,
+        "ci_high": -0.024228079847736755,
+        "se_hc3": 0.046205797197831966,
+        "p_hc3": 0.013431578025161699
+      }
+    },
+    "logsqft_x_lot": {
+      "F_p": 2.040260534045726e-09,
+      "HC3_p": 1.300075346010256e-10,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.04444511250065289,
+        "se": 0.042121440773030955,
+        "p": 0.2914089239938228,
+        "ci_low": -0.03813473112876761,
+        "ci_high": 0.1270249561300734,
+        "se_hc3": 0.04319317707277753,
+        "p_hc3": 0.3035450332406889
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.15598005469767393,
+        "se": 0.034958493694151736,
+        "p": 8.33348753631285e-06,
+        "ci_low": -0.22451681150850705,
+        "ci_high": -0.08744329788684081,
+        "se_hc3": 0.03295442144051641,
+        "p_hc3": 2.2813307155722785e-06
+      }
+    },
+    "all": {
+      "F_p": 1.888863527367291e-07,
+      "HC3_p": 9.02854949398617e-09,
+      "pacific_minus_SA": {
+        "term": "log_sqft:division[T.Pacific]",
+        "est": 0.09302137839525478,
+        "se": 0.04453848545789387,
+        "p": 0.03680637254117045,
+        "ci_low": 0.005702759308078745,
+        "ci_high": 0.1803399974824308,
+        "se_hc3": 0.046153516831173934,
+        "p_hc3": 0.04391727198729949
+      },
+      "ENC_minus_SA": {
+        "term": "log_sqft:division[T.ENCentral]",
+        "est": -0.1226768107697188,
+        "se": 0.03611679508897038,
+        "p": 0.0006883555985925037,
+        "ci_low": -0.1934845322402846,
+        "ci_high": -0.051869089299153,
+        "se_hc3": 0.03379333477986214,
+        "p_hc3": 0.00028651827465653047
+      }
+    },
+    "excl_top_bottom_coded": {
+      "n": 4022,
+      "F_p": 2.6258194526615497e-09,
+      "HC3_p": 1.6047004803535752e-10
+    }
+  },
+  "replication_2024_final_spec": {
+    "n": 6118,
+    "R2": 0.7521883604633387,
+    "F_p": 6.85728870860922e-21,
+    "HC3_p": 1.1650382728025481e-17,
+    "slopes": {
+      "SouthAtlantic": {
+        "est": 0.651761780856143,
+        "se": 0.02101869426860856,
+        "ci_low": 0.6105576836792678,
+        "ci_high": 0.6929658780330182,
+        "p": 4.14406626506177e-196,
+        "se_hc3": 0.02404560361541213,
+        "ci_low_hc3": 0.6046238675593217,
+        "ci_high_hc3": 0.6988996941529643,
+        "p_hc3": 7.83349458589958e-153
+      },
+      "NewEngland": {
+        "est": 0.7372119004780462,
+        "se": 0.07452616524122406,
+        "ci_low": 0.5911141783466827,
+        "ci_high": 0.8833096226094097,
+        "p": 6.714402568172837e-23,
+        "se_hc3": 0.07743137623816819,
+        "ci_low_hc3": 0.5854189341651164,
+        "ci_high_hc3": 0.889004866790976,
+        "p_hc3": 2.4191119927934817e-21
+      },
+      "MidAtlantic": {
+        "est": 0.8755924132393934,
+        "se": 0.05092415207440194,
+        "ci_low": 0.7757630097612992,
+        "ci_high": 0.9754218167174876,
+        "p": 9.837223707113836e-65,
+        "se_hc3": 0.08590831405388943,
+        "ci_low_hc3": 0.707181641602421,
+        "ci_high_hc3": 1.0440031848763658,
+        "p_hc3": 3.362780210006186e-24
+      },
+      "ENCentral": {
+        "est": 0.5472375767342172,
+        "se": 0.02998518072042675,
+        "ci_low": 0.4884559852385044,
+        "ci_high": 0.6060191682299301,
+        "p": 1.7346762258361343e-72,
+        "se_hc3": 0.026969203921318654,
+        "ci_low_hc3": 0.4943683696866311,
+        "ci_high_hc3": 0.6001067837818034,
+        "p_hc3": 1.2647209347989056e-88
+      },
+      "WNCentral": {
+        "est": 0.5057743441115875,
+        "se": 0.03343573238110219,
+        "ci_low": 0.44022844727305227,
+        "ci_high": 0.5713202409501227,
+        "p": 9.000748681712048e-51,
+        "se_hc3": 0.03499833907380917,
+        "ci_low_hc3": 0.43716518381849534,
+        "ci_high_hc3": 0.5743835044046797,
+        "p_hc3": 1.4460923532402198e-46
+      },
+      "ESCentral": {
+        "est": 0.7481171342275257,
+        "se": 0.0333651128841336,
+        "ci_low": 0.6827096766554116,
+        "ci_high": 0.8135245917996398,
+        "p": 4.7980026589221025e-107,
+        "se_hc3": 0.040607250334383116,
+        "ci_low_hc3": 0.668512518094804,
+        "ci_high_hc3": 0.8277217503602473,
+        "p_hc3": 8.514537059956273e-74
+      },
+      "WSCentral": {
+        "est": 0.7613516084243639,
+        "se": 0.024342633804515637,
+        "ci_low": 0.7136314105850359,
+        "ci_high": 0.8090718062636919,
+        "p": 3.0981448102993617e-199,
+        "se_hc3": 0.02685849487873045,
+        "ci_low_hc3": 0.7086994303744342,
+        "ci_high_hc3": 0.8140037864742936,
+        "p_hc3": 4.052503599903171e-166
+      },
+      "Mountain": {
+        "est": 0.5431996568531894,
+        "se": 0.02790886955377971,
+        "ci_low": 0.4884883718183174,
+        "ci_high": 0.5979109418880614,
+        "p": 6.741389517597151e-82,
+        "se_hc3": 0.02950156429464509,
+        "ci_low_hc3": 0.48536612511559396,
+        "ci_high_hc3": 0.6010331885907848,
+        "p_hc3": 1.0261765694213588e-73
+      },
+      "Pacific": {
+        "est": 0.7039867973506642,
+        "se": 0.03202681407240723,
+        "ci_low": 0.6412028802128589,
+        "ci_high": 0.7667707144884695,
+        "p": 4.18388881190276e-103,
+        "se_hc3": 0.04168283866502163,
+        "ci_low_hc3": 0.6222736465234666,
+        "ci_high_hc3": 0.7856999481778617,
+        "p_hc3": 1.425497161803343e-62
+      }
+    }
+  }
+}

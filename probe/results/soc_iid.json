@@ -1,0 +1,81 @@
+{
+  "cluster_division_individual": {
+    "log_sqft:division[T.NewEngland]": {
+      "est": -0.04709578014709972,
+      "se_cluster": 0.07787889207820077,
+      "p_cluster": 0.5453577480047638,
+      "se_ols": 0.0939728444376299,
+      "p_ols": 0.6162816557147494
+    },
+    "log_sqft:division[T.MidAtlantic]": {
+      "est": 0.05638483658261566,
+      "se_cluster": 0.02582840022574755,
+      "p_cluster": 0.029031707681225767,
+      "se_ols": 0.053451595779845096,
+      "p_ols": 0.29154126161788574
+    },
+    "log_sqft:division[T.ENCentral]": {
+      "est": -0.15333390315863438,
+      "se_cluster": 0.011887082768048786,
+      "p_cluster": 4.547715642428562e-38,
+      "se_ols": 0.03468102107848556,
+      "p_ols": 1.0055617351315482e-05
+    },
+    "log_sqft:division[T.WNCentral]": {
+      "est": -0.14359986998829302,
+      "se_cluster": 0.025579568695670952,
+      "p_cluster": 1.9787339165811096e-08,
+      "se_ols": 0.040514621009095385,
+      "p_ols": 0.00039771523481441843
+    },
+    "log_sqft:division[T.ESCentral]": {
+      "est": 0.02324089154572264,
+      "se_cluster": 0.008506747994654198,
+      "p_cluster": 0.006294089899844055,
+      "se_ols": 0.0385603452842704,
+      "p_ols": 0.5467303236320957
+    },
+    "log_sqft:division[T.WSCentral]": {
+      "est": 0.05520413675679595,
+      "se_cluster": 0.020029107539619676,
+      "p_cluster": 0.005847802692844771,
+      "se_ols": 0.030563246022030564,
+      "p_ols": 0.07095316072597842
+    },
+    "log_sqft:division[T.Mountain]": {
+      "est": -0.09440080195426863,
+      "se_cluster": 0.017421254712864095,
+      "p_cluster": 6.002915681555311e-08,
+      "se_ols": 0.03401749189806372,
+      "p_ols": 0.005542979078757885
+    },
+    "log_sqft:division[T.Pacific]": {
+      "est": 0.04864416246754101,
+      "se_cluster": 0.026978706575793404,
+      "p_cluster": 0.0713791659795054,
+      "se_ols": 0.04154216350068549,
+      "p_ols": 0.24168046012963565
+    }
+  },
+  "cluster_division_joint": {
+    "stat": 8054.714360215084,
+    "p": 0.0,
+    "note": "8 restrictions with only 9 clusters: covariance rank <= 8, test unreliable"
+  },
+  "midwest_contrast": {
+    "term": "log_sqft:C(midwest, Treatment('Other'))[T.Midwest]",
+    "est": -0.15223244201523328,
+    "p_ols": 1.7503500185729947e-09,
+    "p_hc3": 3.2317155579017264e-10,
+    "p_cluster_division": 4.3913234394177396e-08,
+    "se_cluster": 0.0278083381300601
+  },
+  "weighted_final": {
+    "F": 7.006202206114709,
+    "p": 3.1908352031320617e-09,
+    "HC3_p": 2.7900038901755987e-09,
+    "ENC_minus_SA": -0.12144409186142699,
+    "WNC_minus_SA": -0.1862079609034448,
+    "Pacific_minus_SA": 0.022538934080824802
+  }
+}

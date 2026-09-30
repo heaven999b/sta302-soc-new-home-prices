@@ -1,0 +1,1291 @@
+{
+  "flow": [
+    [
+      "raw 2025 SOC records",
+      25246
+    ],
+    [
+      "CAT=1 built for sale",
+      16849
+    ],
+    [
+      "sold (contract signed) in 2025",
+      8901
+    ],
+    [
+      "sales price reported",
+      8532
+    ],
+    [
+      "detached, not part of condominium project",
+      7062
+    ],
+    [
+      "floor area and lot size reported",
+      6315
+    ],
+    [
+      "no 'not reported' codes in categorical predictors",
+      6185
+    ],
+    [
+      "final analysis sample",
+      6185
+    ]
+  ],
+  "n_train": 4330,
+  "n_test": 1855,
+  "Y_train": {
+    "mean": 526.9679076212472,
+    "sd": 307.41343348593614,
+    "median": 433.0,
+    "min": 209.9,
+    "max": 3300.0,
+    "skew": 3.04344955605323,
+    "exkurt": 15.876321106023017,
+    "share_topbottom_coded": 0.07113163972286374
+  },
+  "X_train": {
+    "sqft100_p10_p50_p90": [
+      16.0,
+      23.0,
+      38.0
+    ],
+    "division_counts": {
+      "SouthAtlantic": 1308,
+      "WSCentral": 850,
+      "ENCentral": 510,
+      "Mountain": 473,
+      "Pacific": 374,
+      "ESCentral": 344,
+      "WNCentral": 313,
+      "MidAtlantic": 119,
+      "NewEngland": 39
+    }
+  },
+  "model_formula": "price_k ~ sqft100 * division + lot_k + C(stories) + C(bedrooms) + C(fullbath) + C(halfbath) + C(garage) + C(foundation) + C(fireplace) + C(hoa) + C(age_restricted) + C(wall) + C(heat_fuel) + C(sewer) + C(stage) + sale_month",
+  "diag_raw": {
+    "n": 4330,
+    "k_params": 52,
+    "R2": 0.7132610036080191,
+    "adjR2": 0.7098426565262073,
+    "resid_se": 165.59210418590217,
+    "F": 208.65669475259014,
+    "F_p": 0.0,
+    "resid_skew": 2.0445145432931358,
+    "resid_exkurt": 18.00496765358256,
+    "BP_LM": 1280.5839070188488,
+    "BP_p": 1.6158892355528184e-234,
+    "max_cooks": 0.184495787472619,
+    "n_cooks_gt_4n": 313,
+    "n_cooks_gt_0.5": 0,
+    "max_leverage": 0.36382343843525,
+    "n_lev_gt_2pn": 349,
+    "icc": {
+      "division": {
+        "icc": -0.0022456753246180732,
+        "n_groups": 9,
+        "mean_size": 481.1111111111111,
+        "F": 5.030816891019348e-25,
+        "p": 1.0
+      },
+      "region4": {
+        "icc": -0.0011749059622995382,
+        "n_groups": 4,
+        "mean_size": 1082.5,
+        "F": 2.6424011420317548e-25,
+        "p": 1.0
+      }
+    }
+  },
+  "icc_division_if_division_omitted": {
+    "icc": 0.15346796673527024,
+    "n_groups": 9,
+    "mean_size": 481.1111111111111,
+    "F": 81.90988176103019,
+    "p": 1.2776407930280877e-126
+  },
+  "gvif_full": [
+    {
+      "term": "division",
+      "df": 8,
+      "GVIF": 22227788.87461559,
+      "GVIF_adj": 2.8785979809544706
+    },
+    {
+      "term": "sqft100:division",
+      "df": 8,
+      "GVIF": 18291918.699980758,
+      "GVIF_adj": 2.8437486242845935
+    },
+    {
+      "term": "sqft100",
+      "df": 1,
+      "GVIF": 6.19426087197452,
+      "GVIF_adj": 2.4888272081393117
+    },
+    {
+      "term": "lot_k",
+      "df": 1,
+      "GVIF": 1.6975492652985624,
+      "GVIF_adj": 1.3029003282287415
+    },
+    {
+      "term": "C(sewer)",
+      "df": 1,
+      "GVIF": 1.628963522519732,
+      "GVIF_adj": 1.2763085530230267
+    },
+    {
+      "term": "C(fullbath)",
+      "df": 3,
+      "GVIF": 4.301122022970267,
+      "GVIF_adj": 1.2752547816249056
+    }
+  ],
+  "gvif_main_effects": [
+    {
+      "term": "sqft100",
+      "df": 1,
+      "GVIF": 3.3930529529890383,
+      "GVIF_adj": 1.842024145604242
+    },
+    {
+      "term": "lot_k",
+      "df": 1,
+      "GVIF": 1.6846393486143039,
+      "GVIF_adj": 1.2979365734173238
+    },
+    {
+      "term": "C(sewer)",
+      "df": 1,
+      "GVIF": 1.6198600792096076,
+      "GVIF_adj": 1.2727372388712477
+    },
+    {
+      "term": "C(fullbath)",
+      "df": 3,
+      "GVIF": 4.031218656392073,
+      "GVIF_adj": 1.2615546224041292
+    },
+    {
+      "term": "C(bedrooms)",
+      "df": 3,
+      "GVIF": 3.0761111288784653,
+      "GVIF_adj": 1.205962129960415
+    },
+    {
+      "term": "C(stories)",
+      "df": 2,
+      "GVIF": 2.088715801504395,
+      "GVIF_adj": 1.2021809397488388
+    }
+  ],
+  "boxcox_raw": {
+    "lambda": -0.41999999999999854,
+    "ci95": [
+      -0.4699999999999982,
+      -0.3749999999999981
+    ]
+  },
+  "interaction_partialF": {
+    "F": 37.27241909469718,
+    "p": 1.1814574633700508e-57,
+    "df_num": 8,
+    "delta_R2": 0.01998589255598837
+  },
+  "interaction_wald_hc3": {
+    "F": 16.224066507249475,
+    "p": 7.516247609515637e-24,
+    "df_num": 8,
+    "terms": [
+      "sqft100:division[T.NewEngland]",
+      "sqft100:division[T.MidAtlantic]",
+      "sqft100:division[T.ENCentral]",
+      "sqft100:division[T.WNCentral]",
+      "sqft100:division[T.ESCentral]",
+      "sqft100:division[T.WSCentral]",
+      "sqft100:division[T.Mountain]",
+      "sqft100:division[T.Pacific]"
+    ]
+  },
+  "dR2_X_and_XxG": {
+    "F": 122.54694828491054,
+    "p": 1.2788557017535989e-205,
+    "df_num": 9,
+    "delta_R2": 0.07392494171552999
+  },
+  "coefs_raw": [
+    {
+      "term": "sqft100",
+      "est": 11.833737981868394,
+      "se": 0.6298105564195693,
+      "p": 9.585854662103898e-76,
+      "ci_low": 10.598982629396458,
+      "ci_high": 13.06849333434033,
+      "se_hc3": 0.8143698393940914,
+      "p_hc3": 9.819194774832267e-47
+    },
+    {
+      "term": "sqft100:division[T.NewEngland]",
+      "est": 7.425837468573758,
+      "se": 2.17016096673405,
+      "p": 0.0006279320445650717,
+      "ci_low": 3.171196383111508,
+      "ci_high": 11.680478554036007,
+      "se_hc3": 5.400796710069212,
+      "p_hc3": 0.16921826000568965
+    },
+    {
+      "term": "sqft100:division[T.MidAtlantic]",
+      "est": 12.722770257031437,
+      "se": 1.2058177517848991,
+      "p": 1.035730419078574e-25,
+      "ci_low": 10.35874204577642,
+      "ci_high": 15.086798468286453,
+      "se_hc3": 5.112265827468701,
+      "p_hc3": 0.012859744220101254
+    },
+    {
+      "term": "sqft100:division[T.ENCentral]",
+      "est": -4.983871645321136,
+      "se": 0.9065853459575428,
+      "p": 4.07851640766969e-08,
+      "ci_low": -6.761249139209894,
+      "ci_high": -3.206494151432378,
+      "se_hc3": 0.9928606463868709,
+      "p_hc3": 5.385367803654512e-07
+    },
+    {
+      "term": "sqft100:division[T.WNCentral]",
+      "est": -1.263997886832715,
+      "se": 1.2038417758500541,
+      "p": 0.29379116258241356,
+      "ci_low": -3.6241521603821205,
+      "ci_high": 1.0961563867166904,
+      "se_hc3": 1.2413052796033255,
+      "p_hc3": 0.3086019008265144
+    },
+    {
+      "term": "sqft100:division[T.ESCentral]",
+      "est": 1.9477730565312525,
+      "se": 1.0012700326136166,
+      "p": 0.05180401119521237,
+      "ci_low": -0.015235533016419556,
+      "ci_high": 3.9107816460789246,
+      "se_hc3": 1.4202965996057686,
+      "p_hc3": 0.17032698323284168
+    },
+    {
+      "term": "sqft100:division[T.WSCentral]",
+      "est": -2.56750954112122,
+      "se": 0.8202577549045768,
+      "p": 0.001759088601289372,
+      "ci_low": -4.175640181282033,
+      "ci_high": -0.959378900960407,
+      "se_hc3": 0.775014816475926,
+      "p_hc3": 0.0009311714612475987
+    },
+    {
+      "term": "sqft100:division[T.Mountain]",
+      "est": 2.766160708451053,
+      "se": 0.869554789206675,
+      "p": 0.0014775431983292163,
+      "ci_low": 1.0613823123181125,
+      "ci_high": 4.4709391045839935,
+      "se_hc3": 1.2393858023331237,
+      "p_hc3": 0.025674466099423726
+    },
+    {
+      "term": "sqft100:division[T.Pacific]",
+      "est": 9.86419696133237,
+      "se": 1.1731177412062475,
+      "p": 5.588061936719319e-17,
+      "ci_low": 7.564277731224664,
+      "ci_high": 12.164116191440076,
+      "se_hc3": 1.5191410218325299,
+      "p_hc3": 9.357630327753435e-11
+    },
+    {
+      "term": "lot_k",
+      "est": 0.21419686672201674,
+      "se": 0.1980013005784712,
+      "p": 0.2794044919443811,
+      "ci_low": -0.17398837913277235,
+      "ci_high": 0.6023821125768059,
+      "se_hc3": 0.25871564511576517,
+      "p_hc3": 0.4077597797510284
+    }
+  ],
+  "slopes_raw_by_division": {
+    "SouthAtlantic": {
+      "est": 11.833737981868394,
+      "se": 0.6298105564195693,
+      "ci_low": 10.598982629396458,
+      "ci_high": 13.06849333434033,
+      "p": 9.585854662103898e-76,
+      "se_hc3": 0.8143698393940914,
+      "ci_low_hc3": 10.237150709975024,
+      "ci_high_hc3": 13.430325253761763,
+      "p_hc3": 9.819194774832267e-47,
+      "n_train": 1308,
+      "p10_p90_within_group": {
+        "x_p10": 16.0,
+        "x_p90": 40.0,
+        "delta_y": 284.00971156484144,
+        "delta_y_in_sd": 0.923868903008868
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 260.3422356011047,
+        "delta_y_in_sd": 0.8468798277581291
+      }
+    },
+    "NewEngland": {
+      "est": 19.259575450442153,
+      "se": 2.1465221281849463,
+      "ci_low": 15.051278749219282,
+      "ci_high": 23.467872151665023,
+      "p": 4.254387031980983e-19,
+      "se_hc3": 5.486650952470159,
+      "ci_low_hc3": 8.502893839353687,
+      "ci_high_hc3": 30.016257061530617,
+      "p_hc3": 0.00045228379249267597,
+      "n_train": 39,
+      "p10_p90_within_group": {
+        "x_p10": 18.6,
+        "x_p90": 45.2,
+        "delta_y": 512.3047069817613,
+        "delta_y_in_sd": 1.6665007159005587
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 423.7106599097274,
+        "delta_y_in_sd": 1.378308862774898
+      }
+    },
+    "MidAtlantic": {
+      "est": 24.55650823889983,
+      "se": 1.140042815019158,
+      "ci_low": 22.32143301898829,
+      "ci_high": 26.79158345881137,
+      "p": 8.670399142833604e-98,
+      "se_hc3": 5.150295122354164,
+      "ci_low_hc3": 14.459258511474788,
+      "ci_high_hc3": 34.653757966324875,
+      "p_hc3": 1.922674486815678e-06,
+      "n_train": 119,
+      "p10_p90_within_group": {
+        "x_p10": 16.0,
+        "x_p90": 45.0,
+        "delta_y": 712.1387389280951,
+        "delta_y_in_sd": 2.316550486596334
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 540.2431812557962,
+        "delta_y_in_sd": 1.7573831277627359
+      }
+    },
+    "ENCentral": {
+      "est": 6.849866336547258,
+      "se": 0.846138021096653,
+      "ci_low": 5.19099695141251,
+      "ci_high": 8.508735721682006,
+      "p": 7.37003056503236e-16,
+      "se_hc3": 1.0029236591261526,
+      "ci_low_hc3": 4.883615781353677,
+      "ci_high_hc3": 8.81611689174084,
+      "p_hc3": 9.692859312611026e-12,
+      "n_train": 510,
+      "p10_p90_within_group": {
+        "x_p10": 15.0,
+        "x_p90": 36.0,
+        "delta_y": 143.8471930674924,
+        "delta_y_in_sd": 0.467927479408844
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 150.6970594040397,
+        "delta_y_in_sd": 0.49020974033307474
+      }
+    },
+    "WNCentral": {
+      "est": 10.569740095035678,
+      "se": 1.1482161530028394,
+      "ci_low": 8.318640893436239,
+      "ci_high": 12.820839296635118,
+      "p": 5.2031781339570493e-20,
+      "se_hc3": 1.2341015142183904,
+      "ci_low_hc3": 8.150261039559606,
+      "ci_high_hc3": 12.989219150511751,
+      "p_hc3": 1.4909294979712065e-17,
+      "n_train": 313,
+      "p10_p90_within_group": {
+        "x_p10": 14.0,
+        "x_p90": 35.0,
+        "delta_y": 221.96454199574924,
+        "delta_y_in_sd": 0.7220391753176392
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 232.53428209078493,
+        "delta_y_in_sd": 0.7564219931899077
+      }
+    },
+    "ESCentral": {
+      "est": 13.781511038399646,
+      "se": 0.9698881600539413,
+      "ci_low": 11.880027195807529,
+      "ci_high": 15.682994880991764,
+      "p": 8.259788430071323e-45,
+      "se_hc3": 1.420591017401331,
+      "ci_low_hc3": 10.996415830752307,
+      "ci_high_hc3": 16.566606246046987,
+      "p_hc3": 5.014350002217595e-22,
+      "n_train": 344,
+      "p10_p90_within_group": {
+        "x_p10": 16.0,
+        "x_p90": 36.0,
+        "delta_y": 275.6302207679929,
+        "delta_y_in_sd": 0.8966108528259964
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 303.1932428447922,
+        "delta_y_in_sd": 0.986271938108596
+      }
+    },
+    "WSCentral": {
+      "est": 9.266228440747174,
+      "se": 0.7938667305272371,
+      "ci_low": 7.7098378965167775,
+      "ci_high": 10.82261898497757,
+      "p": 5.190382805690515e-31,
+      "se_hc3": 0.8656051842940355,
+      "ci_low_hc3": 7.5691933187723475,
+      "ci_high_hc3": 10.963263562722,
+      "p_hc3": 2.0786853589794243e-26,
+      "n_train": 850,
+      "p10_p90_within_group": {
+        "x_p10": 16.0,
+        "x_p90": 37.0,
+        "delta_y": 194.59079725569066,
+        "delta_y_in_sd": 0.6329937994222136
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 203.85702569643783,
+        "delta_y_in_sd": 0.6631363612994619
+      }
+    },
+    "Mountain": {
+      "est": 14.599898690319447,
+      "se": 0.7999534740182294,
+      "ci_low": 13.031574971854322,
+      "ci_high": 16.168222408784573,
+      "p": 1.0055755447737342e-71,
+      "se_hc3": 1.2272976534684774,
+      "ci_low_hc3": 12.193758730850575,
+      "ci_high_hc3": 17.00603864978832,
+      "p_hc3": 3.967142633682906e-32,
+      "n_train": 473,
+      "p10_p90_within_group": {
+        "x_p10": 16.0,
+        "x_p90": 41.80000000000001,
+        "delta_y": 376.67738621024193,
+        "delta_y_in_sd": 1.225312055946555
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 321.19777118702785,
+        "delta_y_in_sd": 1.0448397376288447
+      }
+    },
+    "Pacific": {
+      "est": 21.697934943200764,
+      "se": 1.1359325867703107,
+      "ci_low": 19.47091790249631,
+      "ci_high": 23.924951983905217,
+      "p": 4.03814505332232e-78,
+      "se_hc3": 1.5168903432522187,
+      "ci_low_hc3": 18.724043109612765,
+      "ci_high_hc3": 24.671826776788762,
+      "p_hc3": 2.257668555645878e-45,
+      "n_train": 374,
+      "p10_p90_within_group": {
+        "x_p10": 15.300000000000004,
+        "x_p90": 33.0,
+        "delta_y": 384.0534484946534,
+        "delta_y_in_sd": 1.249306005074835
+      },
+      "p10_p90_overall_x": {
+        "x_p10": 16.0,
+        "x_p90": 38.0,
+        "delta_y": 477.3545687504168,
+        "delta_y_in_sd": 1.5528097238218292
+      }
+    }
+  },
+  "diag_log": {
+    "n": 4330,
+    "k_params": 52,
+    "R2": 0.7456665290898155,
+    "adjR2": 0.7426345031392734,
+    "resid_se": 0.22734023342856435,
+    "F": 245.93012766149945,
+    "F_p": 0.0,
+    "resid_skew": 0.5483476813398743,
+    "resid_exkurt": 2.6423859747427,
+    "BP_LM": 523.4180374550655,
+    "BP_p": 1.351359830933818e-79,
+    "max_cooks": 0.045799614841471596,
+    "n_cooks_gt_4n": 294,
+    "n_cooks_gt_0.5": 0,
+    "max_leverage": 0.36382343843525,
+    "n_lev_gt_2pn": 349,
+    "icc": {
+      "division": {
+        "icc": -0.0022456753246180732,
+        "n_groups": 9,
+        "mean_size": 481.1111111111111,
+        "F": 3.88590684328603e-24,
+        "p": 1.0
+      }
+    }
+  },
+  "interaction_partialF_log": {
+    "F": 8.262126078836921,
+    "p": 3.609731611687725e-11,
+    "df_num": 8,
+    "delta_R2": 0.003929565596499485
+  },
+  "interaction_wald_hc3_log": {
+    "F": 5.1762844431514505,
+    "p": 1.8798615087866824e-06,
+    "df_num": 8,
+    "terms": [
+      "sqft100:division[T.NewEngland]",
+      "sqft100:division[T.MidAtlantic]",
+      "sqft100:division[T.ENCentral]",
+      "sqft100:division[T.WNCentral]",
+      "sqft100:division[T.ESCentral]",
+      "sqft100:division[T.WSCentral]",
+      "sqft100:division[T.Mountain]",
+      "sqft100:division[T.Pacific]"
+    ]
+  },
+  "dR2_X_and_XxG_log": {
+    "F": 113.36322089568644,
+    "p": 2.4666210316347007e-191,
+    "df_num": 9,
+    "delta_R2": 0.06065651075166456
+  },
+  "slopes_log_by_division": {
+    "SouthAtlantic": {
+      "est": 0.020478517479094675,
+      "se": 0.0008646624766085239,
+      "ci_low": 0.018783330553134726,
+      "ci_high": 0.022173704405054624,
+      "p": 1.2584744196479373e-116,
+      "se_hc3": 0.0010873138834149626,
+      "ci_low_hc3": 0.01834681831387891,
+      "ci_high_hc3": 0.02261021664431044,
+      "p_hc3": 4.400716526336346e-76
+    },
+    "NewEngland": {
+      "est": 0.015242690135789251,
+      "se": 0.0029469451099751773,
+      "ci_low": 0.00946514923734999,
+      "ci_high": 0.021020231034228513,
+      "p": 2.4171620127225974e-07,
+      "se_hc3": 0.0048768604873336285,
+      "ci_low_hc3": 0.005681514114499259,
+      "ci_high_hc3": 0.024803866157079243,
+      "p_hc3": 0.0017868455344612118
+    },
+    "MidAtlantic": {
+      "est": 0.01951152324928107,
+      "se": 0.001565156750433263,
+      "ci_low": 0.016443004223430386,
+      "ci_high": 0.022580042275131756,
+      "p": 4.610726771836574e-35,
+      "se_hc3": 0.003252008935583131,
+      "ci_low_hc3": 0.013135899026141155,
+      "ci_high_hc3": 0.025887147472420987,
+      "p_hc3": 2.138482291763183e-09
+    },
+    "ENCentral": {
+      "est": 0.014720415346638866,
+      "se": 0.0011616569290824523,
+      "ci_low": 0.012442965252637706,
+      "ci_high": 0.016997865440640025,
+      "p": 3.7494088803749144e-36,
+      "se_hc3": 0.0015884035782996525,
+      "ci_low_hc3": 0.011606320480809888,
+      "ci_high_hc3": 0.017834510212467843,
+      "p_hc3": 2.946840447222542e-20
+    },
+    "WNCentral": {
+      "est": 0.019248812298931203,
+      "se": 0.0015763778685791783,
+      "ci_low": 0.01615829406149195,
+      "ci_high": 0.022339330536370456,
+      "p": 9.859036522404517e-34,
+      "se_hc3": 0.0018784298390515243,
+      "ci_low_hc3": 0.015566115535006654,
+      "ci_high_hc3": 0.02293150906285575,
+      "p_hc3": 2.322298845301065e-24
+    },
+    "ESCentral": {
+      "est": 0.022228717221122282,
+      "se": 0.001331552623177765,
+      "ci_low": 0.019618183447421143,
+      "ci_high": 0.024839250994823422,
+      "p": 1.1628197043615596e-60,
+      "se_hc3": 0.0016476195393883282,
+      "ci_low_hc3": 0.018998528358200466,
+      "ci_high_hc3": 0.025458906084044098,
+      "p_hc3": 1.1790087789332378e-40
+    },
+    "WSCentral": {
+      "est": 0.02313034653314759,
+      "se": 0.0010898940424515628,
+      "ci_low": 0.020993588917977,
+      "ci_high": 0.025267104148318183,
+      "p": 4.043650172026309e-95,
+      "se_hc3": 0.0015107067087869108,
+      "ci_low_hc3": 0.020168577830358123,
+      "ci_high_hc3": 0.02609211523593706,
+      "p_hc3": 1.4713185680339234e-51
+    },
+    "Mountain": {
+      "est": 0.017369591756947515,
+      "se": 0.0010982504897161529,
+      "ci_low": 0.015216451170925719,
+      "ci_high": 0.01952273234296931,
+      "p": 8.427948367152951e-55,
+      "se_hc3": 0.0014049071025325802,
+      "ci_low_hc3": 0.01461524515717045,
+      "ci_high_hc3": 0.02012393835672458,
+      "p_hc3": 1.5902484832270025e-34
+    },
+    "Pacific": {
+      "est": 0.0257928527697878,
+      "se": 0.0015595138470223093,
+      "ci_low": 0.02273539676140981,
+      "ci_high": 0.02885030877816579,
+      "p": 1.314167608389698e-59,
+      "se_hc3": 0.0018229616263003572,
+      "ci_low_hc3": 0.022218902472381556,
+      "ci_high_hc3": 0.029366803067194046,
+      "p_hc3": 1.881926357141079e-44
+    }
+  },
+  "robustness": {
+    "plus_division_x_lot": {
+      "partialF": {
+        "F": 42.325175329887244,
+        "p": 1.1500544458050107e-65,
+        "df_num": 8,
+        "delta_R2": 0.02208087941488046
+      },
+      "wald_hc3": {
+        "F": 15.647842183538636,
+        "p": 6.363341659866982e-23,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 10.269434761106716,
+          "se": 1.2197340154123266,
+          "p": 5.103591595082236e-17,
+          "ci_low": 7.878122187314386,
+          "ci_high": 12.660747334899046,
+          "se_hc3": 1.6039094184404963,
+          "p_hc3": 1.6907186722693267e-10
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 8.171059233837566,
+          "se": 2.146108038393239,
+          "p": 0.00014241458058641724,
+          "ci_low": 3.9635721324864663,
+          "ci_high": 12.378546335188666,
+          "se_hc3": 5.2028611752859995,
+          "p_hc3": 0.11637445690514783
+        }
+      ]
+    },
+    "plus_sqft_x_stories": {
+      "partialF": {
+        "F": 34.829499403077214,
+        "p": 9.265336072164518e-54,
+        "df_num": 8,
+        "delta_R2": 0.0185800765112758
+      },
+      "wald_hc3": {
+        "F": 15.755087309929948,
+        "p": 4.2727924950662264e-23,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 10.000236369399978,
+          "se": 1.1729376805452785,
+          "p": 2.076985495567675e-17,
+          "ci_low": 7.700669847187837,
+          "ci_high": 12.29980289161212,
+          "se_hc3": 1.5755466603184562,
+          "p_hc3": 2.4214570866672015e-10
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 6.375080289701733,
+          "se": 2.178396272681831,
+          "p": 0.003446035991233305,
+          "ci_low": 2.104293167881176,
+          "ci_high": 10.64586741152229,
+          "se_hc3": 4.958139623485833,
+          "p_hc3": 0.19858922854185834
+        }
+      ]
+    },
+    "plus_sqft_x_garage": {
+      "partialF": {
+        "F": 33.58322547152318,
+        "p": 9.072967777403537e-52,
+        "df_num": 8,
+        "delta_R2": 0.01734979310989848
+      },
+      "wald_hc3": {
+        "F": 16.400881496337142,
+        "p": 3.905597322675965e-24,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 10.088066021643208,
+          "se": 1.1517882939465522,
+          "p": 2.8020629177764553e-18,
+          "ci_low": 7.82996312258353,
+          "ci_high": 12.346168920702885,
+          "se_hc3": 1.4985335643857314,
+          "p_hc3": 1.8958541210671883e-11
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 8.283127889523541,
+          "se": 2.1409095939980283,
+          "p": 0.00011092108698698889,
+          "ci_low": 4.085833832760049,
+          "ci_high": 12.480421946287034,
+          "se_hc3": 5.886281386802294,
+          "p_hc3": 0.1594431709751428
+        }
+      ]
+    },
+    "plus_sqft_x_fullbath": {
+      "partialF": {
+        "F": 39.300573976727584,
+        "p": 7.080410505108602e-61,
+        "df_num": 8,
+        "delta_R2": 0.020969327873469945
+      },
+      "wald_hc3": {
+        "F": 17.3705339420833,
+        "p": 1.0721300195584392e-25,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 9.41033364128904,
+          "se": 1.1748389918818583,
+          "p": 1.4679015501220147e-15,
+          "ci_low": 7.107039409667095,
+          "ci_high": 11.713627872910983,
+          "se_hc3": 1.5744167362324906,
+          "p_hc3": 2.4576163352839694e-09
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 8.08278966073002,
+          "se": 2.169928973284083,
+          "p": 0.0001979055589316688,
+          "ci_low": 3.8286025578753744,
+          "ci_high": 12.336976763584666,
+          "se_hc3": 4.781174810948553,
+          "p_hc3": 0.0909966970668657
+        }
+      ]
+    },
+    "plus_sqft_x_stage": {
+      "partialF": {
+        "F": 36.238880195731205,
+        "p": 5.238807273617862e-56,
+        "df_num": 8,
+        "delta_R2": 0.019430425969117926
+      },
+      "wald_hc3": {
+        "F": 15.355854696754946,
+        "p": 1.873645392615657e-22,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 9.690226767460617,
+          "se": 1.1798185190083001,
+          "p": 2.8214710557848037e-16,
+          "ci_low": 7.37717023121213,
+          "ci_high": 12.003283303709104,
+          "se_hc3": 1.5409610838057644,
+          "p_hc3": 3.5279960515306487e-10
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 7.298680174377167,
+          "se": 2.1719697129228135,
+          "p": 0.0007851283095972996,
+          "ci_low": 3.0404924445958885,
+          "ci_high": 11.556867904158445,
+          "se_hc3": 5.487666594106405,
+          "p_hc3": 0.1835841876189412
+        }
+      ]
+    },
+    "plus_division_x_fullbath": {
+      "partialF": {
+        "F": 14.567636084023706,
+        "p": 3.471645030499822e-21,
+        "df_num": 8,
+        "delta_R2": 0.0066471060980439756
+      },
+      "wald_hc3": {
+        "F": 6.425345314714248,
+        "p": 2.4762049138998573e-08,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 9.995129267999836,
+          "se": 1.4987545264274271,
+          "p": 2.9063843941092372e-11,
+          "ci_low": 7.056788546889361,
+          "ci_high": 12.93346998911031,
+          "se_hc3": 2.121518255000618,
+          "p_hc3": 2.539825108228182e-06
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 6.466631916842918,
+          "se": 3.146439943585055,
+          "p": 0.03991849720303137,
+          "ci_low": 0.2979682366053584,
+          "ci_high": 12.635295597080477,
+          "se_hc3": 11.218232497361823,
+          "p_hc3": 0.5643486671236804
+        }
+      ]
+    },
+    "plus_all_above": {
+      "partialF": {
+        "F": 35.65343377903346,
+        "p": 4.5629945624314975e-55,
+        "df_num": 8,
+        "delta_R2": 0.017954406493909003
+      },
+      "wald_hc3": {
+        "F": 15.512633013229074,
+        "p": 1.0517317942518787e-22,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 10.514939811165311,
+          "se": 1.2127374998756826,
+          "p": 6.027741108023312e-18,
+          "ci_low": 8.13734246148692,
+          "ci_high": 12.892537160843702,
+          "se_hc3": 1.671917092171563,
+          "p_hc3": 3.513054763323186e-10
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 8.377934909041654,
+          "se": 2.1421040937678812,
+          "p": 9.331622887360854e-05,
+          "ci_low": 4.178294824852097,
+          "ci_high": 12.577574993231211,
+          "se_hc3": 5.035233719941526,
+          "p_hc3": 0.0962135262883688
+        }
+      ]
+    },
+    "plus_sqft_squared": {
+      "partialF": {
+        "F": 40.85267077970618,
+        "p": 2.440140061006901e-63,
+        "df_num": 8,
+        "delta_R2": 0.021712843253290925
+      },
+      "wald_hc3": {
+        "F": 18.924800349296923,
+        "p": 3.3502839466654666e-28,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 9.222677807632564,
+          "se": 1.1724531625547765,
+          "p": 4.597859912746218e-15,
+          "ci_low": 6.92406134427942,
+          "ci_high": 11.52129427098571,
+          "se_hc3": 1.5598907488446958,
+          "p_hc3": 3.6346866650777396e-09
+        }
+      ],
+      "newengland_minus_SA": [
+        {
+          "term": "sqft100:division[T.NewEngland]",
+          "est": 8.374277697215472,
+          "se": 2.16592100152536,
+          "p": 0.00011210207921235608,
+          "ci_low": 4.12794886171632,
+          "ci_high": 12.620606532714625,
+          "se_hc3": 4.343910366958995,
+          "p_hc3": 0.05394364249763975
+        }
+      ]
+    },
+    "exclude_topbottom_coded_prices": {
+      "n": 4022,
+      "partialF": {
+        "F": 14.127599676784365,
+        "p": 1.8488784327221477e-20,
+        "df_num": 8,
+        "delta_R2": 0.009790645065809733
+      },
+      "wald_hc3": {
+        "F": 7.656078342226975,
+        "p": 3.207474060694282e-10,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "R2": 0.6560910752665116
+    },
+    "region4_instead_of_division": {
+      "partialF": {
+        "F": 77.58497103982407,
+        "p": 7.207375151232099e-49,
+        "df_num": 3,
+        "delta_R2": 0.016091071041235416
+      },
+      "R2": 0.7035572237764067,
+      "coefs": [
+        {
+          "term": "sqft100",
+          "est": 8.22108096598157,
+          "se": 0.7299134280601367,
+          "p": 5.083353147366181e-29,
+          "ci_low": 6.790073009503256,
+          "ci_high": 9.652088922459882,
+          "se_hc3": 0.9170008725855521,
+          "p_hc3": 4.535208065467937e-19
+        },
+        {
+          "term": "sqft100:region4[T.Northeast]",
+          "est": 15.754101196557018,
+          "se": 1.1798675433553707,
+          "p": 7.1019808276688616e-40,
+          "ci_low": 13.440950380001619,
+          "ci_high": 18.067252013112416,
+          "se_hc3": 4.073966652769639,
+          "p_hc3": 0.00011180711066251795
+        },
+        {
+          "term": "sqft100:region4[T.South]",
+          "est": 3.4067125615789986,
+          "se": 0.738530920884147,
+          "p": 4.08819516602607e-06,
+          "ci_low": 1.9588098607077422,
+          "ci_high": 4.854615262450255,
+          "se_hc3": 0.8273918797472627,
+          "p_hc3": 3.9036347427565724e-05
+        },
+        {
+          "term": "sqft100:region4[T.West]",
+          "est": 8.489067935774358,
+          "se": 0.8631153981343068,
+          "p": 1.3719902155537628e-22,
+          "ci_low": 6.79691520285138,
+          "ci_high": 10.181220668697335,
+          "se_hc3": 1.1898350883376891,
+          "p_hc3": 1.1337792096907403e-12
+        }
+      ]
+    },
+    "subsample_hoa_yes": {
+      "n": 3221,
+      "partialF": {
+        "F": 20.25114840692418,
+        "p": 3.889280100932903e-30,
+        "df_num": 8,
+        "delta_R2": 0.013519663015364003
+      },
+      "wald_hc3": {
+        "F": 10.665649909060852,
+        "p": 6.71005250723177e-15,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 10.367565880305643,
+          "se": 1.3058445208586604,
+          "p": 2.79604053533036e-15,
+          "ci_low": 7.807180053668073,
+          "ci_high": 12.927951706943212,
+          "se_hc3": 2.000554211656854,
+          "p_hc3": 2.32828338432957e-07
+        }
+      ]
+    },
+    "subsample_hoa_no": {
+      "n": 1109,
+      "partialF": {
+        "F": 11.06767314731747,
+        "p": 4.219341643078815e-15,
+        "df_num": 8,
+        "delta_R2": 0.018100540287736555
+      },
+      "wald_hc3": {
+        "F": 4.235646868756193,
+        "p": 5.111895126786764e-05,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 6.671339974674682,
+          "se": 2.3253017990188862,
+          "p": 0.004199234828043796,
+          "ci_low": 2.108617417913673,
+          "ci_high": 11.23406253143569,
+          "se_hc3": 2.8037507861474116,
+          "p_hc3": 0.01751559012199794
+        }
+      ]
+    },
+    "subsample_stage_not_completed": {
+      "n": 1878,
+      "partialF": {
+        "F": 16.46796754219628,
+        "p": 9.695898528632602e-24,
+        "df_num": 8,
+        "delta_R2": 0.01945632916851303
+      },
+      "wald_hc3": {
+        "F": 10.795806611998618,
+        "p": 5.9769695453579755e-15,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 7.851842713648423,
+          "se": 1.7062491957690173,
+          "p": 4.476504300199769e-06,
+          "ci_low": 4.505438815653779,
+          "ci_high": 11.198246611643066,
+          "se_hc3": 2.0718358604131155,
+          "p_hc3": 0.00015565729232890207
+        }
+      ]
+    },
+    "subsample_sqft_le_4000": {
+      "n": 3999,
+      "partialF": {
+        "F": 19.8555603225437,
+        "p": 1.178783925641133e-29,
+        "df_num": 8,
+        "delta_R2": 0.015596154241295346
+      },
+      "wald_hc3": {
+        "F": 10.653210827106138,
+        "p": 6.387118515668771e-15,
+        "df_num": 8,
+        "terms": [
+          "sqft100:division[T.NewEngland]",
+          "sqft100:division[T.MidAtlantic]",
+          "sqft100:division[T.ENCentral]",
+          "sqft100:division[T.WNCentral]",
+          "sqft100:division[T.ESCentral]",
+          "sqft100:division[T.WSCentral]",
+          "sqft100:division[T.Mountain]",
+          "sqft100:division[T.Pacific]"
+        ]
+      },
+      "pacific_minus_SA": [
+        {
+          "term": "sqft100:division[T.Pacific]",
+          "est": 8.882053848797247,
+          "se": 1.5012052562265452,
+          "p": 3.5654907724320096e-09,
+          "ci_low": 5.938843069538116,
+          "ci_high": 11.825264628056377,
+          "se_hc3": 2.203898100017011,
+          "p_hc3": 5.6790495860395947e-05
+        }
+      ]
+    }
+  }
+}

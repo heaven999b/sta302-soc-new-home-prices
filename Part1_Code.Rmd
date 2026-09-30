@@ -1,0 +1,521 @@
+---
+title: "STA302 Project Part 1 -- Code"
+subtitle: "Sale price of new single-family homes (Census SOC 2025): floor area x Census division"
+author: "Group [##]: Haiwen Yi, [Member 2], [Member 3], [Member 4]"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.align = "center", comment = "#>")
+options(width = 110, scipen = 0)
+```
+
+This file reproduces every number, table and figure in our Part 1 proposal.
+It uses only base R plus the `car` package (for Levene's test).
+Place it in the project folder next to `data/` and `figures/` and knit; all paths are relative.
+
+**Research question.** Among newly built, detached single-family homes sold in the United States in 2025,
+how much does additional finished floor area add to the sale price, and does this marginal price of floor
+area differ across the nine Census divisions, after accounting for lot size, room counts, garage,
+foundation, exterior wall material, heating fuel and the other structural features listed below?
+
+```{r packages}
+library(car)      # leveneTest() only
+set.seed(302)     # no random numbers are drawn below; the train/test split is read from a file (Section 5)
+dir.create("figures", showWarnings = FALSE)
+dir.create("data/cleaned", showWarnings = FALSE, recursive = TRUE)
+```
+
+# Read the original data
+
+The original file is the 2025 annual microdata file of the U.S. Census Bureau's Survey of Construction (SOC),
+downloaded from <https://www.census.gov/construction/chars/microdata.html> (`soc25.xlsx`, saved as CSV
+without any other change). Variable definitions are in `data/original/socmicro_info.pdf`.
+
+```{r read-raw}
+raw <- read.csv("data/original/soc25.csv")
+dim(raw)
+```
+
+# Cleaning: one filter at a time
+
+Each step below prints the number of rows that remain. The codes used come from `socmicro_info.pdf`
+(for example, `0` or `9` means "not reported" for the categorical fields).
+
+```{r clean-function}
+clean_soc <- function(raw, year) {
+  steps <- data.frame(step = character(0), rows_remaining = integer(0))
+  add <- function(label, d) {
+    steps[nrow(steps) + 1, ] <<- list(label, nrow(d))
+    d
+  }
+  s <- add(sprintf("All %d SOC records", year), raw)
+  s <- add("CAT = 1 (house built for sale)", s[s$CAT == 1, ])
+  s <- add(sprintf("Sales contract signed in %d", year),
+           s[s$SALE >= year * 100 + 1 & s$SALE <= year * 100 + 12, ])
+  s <- add("Sale price reported (SLPR > 0)", s[s$SLPR > 0, ])
+  s <- add("Detached (DET = 1) and not in a condominium project (CON = 2)",
+           s[s$DET == 1 & s$CON == 2, ])
+  s <- add("Floor area and lot size reported (SQFS > 0, AREA > 0)",
+           s[s$SQFS > 0 & s$AREA > 0, ])
+  # valid (reported) codes of the 12 categorical source fields
+  valid <- list(STOR = 1:3, BEDR = 2:5, FULB = 1:4, HAFB = 0:2, GAR = 1:4, BASE = 1:4,
+                FPLS = 0:2, ASSOC = 1:2, AGER = 1:2, WAL1 = c(1, 2, 4:9), FUEL = 1:5,
+                SEWER = 1:3)
+  ok <- rep(TRUE, nrow(s))
+  for (v in names(valid)) ok <- ok & s[[v]] %in% valid[[v]]
+  s <- add("No 'not reported' code in any categorical predictor", s[ok, ])
+  list(data = s, steps = steps)
+}
+
+cl <- clean_soc(raw, 2025)
+cl$steps
+stopifnot(nrow(cl$data) == 6185)
+```
+
+# Construct the analysis variables
+
+* `price_k`: sale price in $1,000s (SLPR / 1000; the price includes the improved lot).
+* `sqft100`: finished floor area in 100s of square feet (SQFS / 100).
+* `lot_k`: lot size in 1,000s of square feet (AREA / 1000).
+* `sale_month`: month the sales contract was signed (1--12).
+* `stage`: construction stage when the contract was signed, derived from the sale, start and completion
+  dates only (never from the price).
+* Categorical predictors are recoded to readable labels; the first level listed is the reference level.
+  WAL1 "concrete block" (code 6) is grouped with "other" (code 9); FUEL "oil" (4) is grouped with
+  "other/no heat" (5); SEWER "other" (3, six houses) is grouped with individual septic systems (2).
+* `slpr_flag` (price top/bottom-coded by the Census Bureau) and `weight` (sampling weight) are kept for
+  later sensitivity checks; they are **not** predictors.
+
+```{r construct-function}
+recode <- function(x, map) unname(map[as.character(x)])
+ym <- function(x) (x %/% 100) * 12 + x %% 100            # YYYYMM -> month count
+
+division_levels <- c("SouthAtlantic", "NewEngland", "MidAtlantic", "ENCentral", "WNCentral",
+                     "ESCentral", "WSCentral", "Mountain", "Pacific")
+factor_levels <- list(
+  division = division_levels,
+  stories = c("1", "2", "3plus"),
+  bedrooms = c("2orless", "3", "4", "5plus"),
+  fullbath = c("1orless", "2", "3", "4plus"),
+  halfbath = c("0", "1", "2plus"),
+  garage = c("1car", "2car", "3plus", "other"),
+  foundation = c("basement", "crawl", "slab", "other"),
+  fireplace = c("0", "1", "2plus"),
+  hoa = c("no", "yes"),
+  age_restricted = c("no", "yes"),
+  wall = c("brick", "wood", "stucco", "vinyl", "stone", "fibercement", "other"),
+  heat_fuel = c("electric", "gas", "propane", "other"),
+  sewer = c("public", "septic"),
+  stage = c("completed", "under_constr", "not_started"))
+
+construct_soc <- function(s) {
+  sale_m <- ym(s$SALE)
+  strt_m <- ifelse(s$STRT > 0, ym(s$STRT), 1e9)
+  comp_m <- ifelse(s$COMP > 0, ym(s$COMP), 1e9)
+  data.frame(
+    id = s$ID,
+    price_k = s$SLPR / 1000,
+    sqft100 = s$SQFS / 100,
+    lot_k = s$AREA / 1000,
+    division = recode(s$DIV, c("1" = "NewEngland", "2" = "MidAtlantic", "3" = "ENCentral",
+                               "4" = "WNCentral", "5" = "SouthAtlantic", "6" = "ESCentral",
+                               "7" = "WSCentral", "8" = "Mountain", "9" = "Pacific")),
+    stories = recode(s$STOR, c("1" = "1", "2" = "2", "3" = "3plus")),
+    bedrooms = recode(s$BEDR, c("2" = "2orless", "3" = "3", "4" = "4", "5" = "5plus")),
+    fullbath = recode(s$FULB, c("1" = "1orless", "2" = "2", "3" = "3", "4" = "4plus")),
+    halfbath = recode(s$HAFB, c("0" = "0", "1" = "1", "2" = "2plus")),
+    garage = recode(s$GAR, c("1" = "1car", "2" = "2car", "3" = "3plus", "4" = "other")),
+    foundation = recode(s$BASE, c("1" = "basement", "2" = "crawl", "3" = "slab", "4" = "other")),
+    fireplace = recode(s$FPLS, c("0" = "0", "1" = "1", "2" = "2plus")),
+    hoa = recode(s$ASSOC, c("1" = "yes", "2" = "no")),
+    age_restricted = recode(s$AGER, c("1" = "yes", "2" = "no")),
+    wall = recode(s$WAL1, c("1" = "wood", "2" = "brick", "4" = "stucco", "5" = "vinyl",
+                            "6" = "other", "7" = "stone", "8" = "fibercement", "9" = "other")),
+    heat_fuel = recode(s$FUEL, c("1" = "electric", "2" = "gas", "3" = "propane",
+                                 "4" = "other", "5" = "other")),
+    sewer = recode(s$SEWER, c("1" = "public", "2" = "septic", "3" = "septic")),
+    sale_month = s$SALE %% 100,
+    stage = ifelse(sale_m < strt_m, "not_started",
+                   ifelse(sale_m < comp_m, "under_constr", "completed")),
+    slpr_flag = s$SLPR_F,
+    weight = s$WEIGHT,
+    stringsAsFactors = FALSE)
+}
+
+as_model_factors <- function(d) {
+  for (v in names(factor_levels)) d[[v]] <- factor(d[[v]], levels = factor_levels[[v]])
+  d
+}
+
+soc <- construct_soc(cl$data)
+stopifnot(!anyNA(soc), !anyDuplicated(soc$id))
+dim(soc)
+```
+
+# Attach the archived train/test split and write the cleaned file
+
+The 70/30 train/test split was fixed **once, at the start of the project, and archived** in
+`data/split_ids.csv` (columns `id`, `split`). It was produced in Python with
+`numpy.random.default_rng(302).permutation(6185)` applied to the rows of the cleaned data in the order
+above, with the first 4,330 permuted rows forming the training set. We read the archived file instead of
+re-drawing the split in R (`set.seed(302)` in R would give a different split). This guarantees that the
+test set is the same one that was set aside before any modelling and that it has never been looked at:
+every table, figure and model in this file uses the training rows only.
+
+```{r split-and-write}
+split_ids <- read.csv("data/split_ids.csv")
+stopifnot(nrow(split_ids) == nrow(soc), setequal(split_ids$id, soc$id))
+soc$split <- split_ids$split[match(soc$id, split_ids$id)]
+table(soc$split)
+
+write.csv(soc, "data/cleaned/soc_clean.csv", row.names = FALSE)
+```
+
+# Keep the training set only
+
+```{r train}
+train <- as_model_factors(soc[soc$split == "train", ])
+nrow(train)
+```
+
+# Variable summary (training set, n = 4,330)
+
+Skewness is the moment coefficient $g_1 = m_3 / m_2^{3/2}$. After cleaning no variable has missing values
+(rows with "not reported" codes were removed in Section 2).
+
+```{r summary-table}
+skew <- function(x) { z <- x - mean(x); mean(z^3) / mean(z^2)^1.5 }
+exkurt <- function(x) { z <- x - mean(x); mean(z^4) / mean(z^2)^2 - 3 }
+
+num_vars <- c(price_k = "Response: sale price ($1000s)",
+              sqft100 = "Finished floor area (100 sq ft)",
+              lot_k = "Lot size (1000 sq ft)",
+              sale_month = "Month contract signed (1-12)")
+num_tab <- data.frame(
+  variable = names(num_vars), description = unname(num_vars),
+  mean = sapply(names(num_vars), function(v) mean(train[[v]])),
+  sd = sapply(names(num_vars), function(v) sd(train[[v]])),
+  min = sapply(names(num_vars), function(v) min(train[[v]])),
+  median = sapply(names(num_vars), function(v) median(train[[v]])),
+  max = sapply(names(num_vars), function(v) max(train[[v]])),
+  skewness = sapply(names(num_vars), function(v) skew(train[[v]])),
+  missing = sapply(names(num_vars), function(v) sum(is.na(train[[v]]))),
+  row.names = NULL)
+knitr::kable(num_tab, digits = 2, caption = "Numerical variables (training set)")
+
+cat_vars <- names(factor_levels)
+cat_tab <- data.frame(
+  variable = cat_vars,
+  levels = sapply(cat_vars, function(v) nlevels(train[[v]])),
+  counts = sapply(cat_vars, function(v) {
+    tb <- table(train[[v]]); paste(names(tb), tb, sep = ": ", collapse = "; ")
+  }),
+  missing = sapply(cat_vars, function(v) sum(is.na(train[[v]]))),
+  row.names = NULL)
+knitr::kable(cat_tab, caption = "Categorical variables (training set; first level = reference)")
+```
+
+Additional facts used in the proposal caption:
+
+```{r summary-extra}
+c(price_excess_kurtosis = exkurt(train$price_k),
+  share_price_top_or_bottom_coded = mean(train$slpr_flag == 1),
+  lot_at_topcode_87.12 = sum(train$lot_k == 87.12),
+  lot_at_bottomcode_2.0 = sum(train$lot_k == 2),
+  sqft100_p10 = unname(quantile(train$sqft100, 0.10, type = 7)),
+  sqft100_p90 = unname(quantile(train$sqft100, 0.90, type = 7)))
+```
+
+```{r fig-helper}
+# Draw a figure once into figures/<name> (used by the proposal) and once into this document.
+fig_out <- function(name, width, height, draw) {
+  png(file.path("figures", name), width = width, height = height, units = "in", res = 200)
+  draw()
+  invisible(dev.off())
+  draw()
+}
+pt_col <- adjustcolor("#33658a", alpha.f = 0.25)
+ln_col <- "#d1495b"
+div_col <- c(SouthAtlantic = "#000000", NewEngland = "#E69F00", MidAtlantic = "#56B4E9",
+             ENCentral = "#009E73", WNCentral = "#B8860B", ESCentral = "#0072B2",
+             WSCentral = "#D55E00", Mountain = "#CC79A7", Pacific = "#7F7F7F")
+div_lty <- setNames(rep(1:3, 3), division_levels)
+div_lab <- c(SouthAtlantic = "South Atlantic", NewEngland = "New England", MidAtlantic = "Middle Atlantic",
+             ENCentral = "East North Central", WNCentral = "West North Central",
+             ESCentral = "East South Central", WSCentral = "West South Central",
+             Mountain = "Mountain", Pacific = "Pacific")
+```
+
+# Why an interaction between floor area and division?
+
+Hedonic price theory (Rosen, 1974) treats the slope of price on a characteristic as that characteristic's
+implicit price, which is set in each market separately; construction costs (Gyourko & Saiz, 2006) and
+regulation (Glaeser, Gyourko & Saks, 2005) differ across U.S. regions. The figure below shows that the
+simple (unadjusted) slope of price on floor area differs clearly across divisions in the training data.
+
+```{r interaction-plot, fig.width = 10, fig.height = 4.4}
+within_slopes <- t(sapply(division_levels, function(g) {
+  fit <- lm(price_k ~ sqft100, data = train[train$division == g, ])
+  ci <- confint(fit)["sqft100", ]
+  c(n = sum(train$division == g), slope = unname(coef(fit)["sqft100"]),
+    lower = unname(ci[1]), upper = unname(ci[2]))
+}))
+round(within_slopes, 2)
+
+draw_interaction <- function() {
+  layout(matrix(1:2, 1), widths = c(1, 1.1))
+  par(mar = c(4.5, 5, 3, 1), las = 1)
+  plot(train$sqft100 * 100, train$price_k, pch = 16, cex = 0.35, col = "grey80",
+       xlab = "Finished floor area (sq ft)", ylab = "Sale price ($1000s)",
+       main = "(a) Price vs floor area, one OLS line per division", cex.main = 1)
+  for (g in division_levels) {
+    dg <- train[train$division == g, ]
+    fit <- lm(price_k ~ sqft100, data = dg)
+    xs <- quantile(dg$sqft100, c(0.05, 0.95))
+    lines(xs * 100, coef(fit)[1] + coef(fit)[2] * xs, col = div_col[g], lty = div_lty[g], lwd = 2.2)
+  }
+  legend("topleft", legend = div_lab[division_levels], col = div_col, lty = div_lty, lwd = 2,
+         cex = 0.7, bg = "white", ncol = 2)
+  o <- order(within_slopes[, "slope"])
+  k <- length(o)
+  par(mar = c(4.5, 10.5, 3, 1))
+  plot(within_slopes[o, "slope"], seq_len(k), xlim = range(within_slopes[, c("lower", "upper")]),
+       pch = 19, col = div_col[rownames(within_slopes)[o]], yaxt = "n", ylab = "",
+       xlab = "$1000s per extra 100 sq ft",
+       main = "(b) Within-division slopes with 95% CIs", cex.main = 1)
+  segments(within_slopes[o, "lower"], seq_len(k), within_slopes[o, "upper"], seq_len(k),
+           col = div_col[rownames(within_slopes)[o]], lwd = 2)
+  axis(2, at = seq_len(k), labels = sprintf("%s (n=%d)", div_lab[rownames(within_slopes)[o]],
+                                            within_slopes[o, "n"]), las = 1, cex.axis = 0.75)
+  abline(v = mean(within_slopes[, "slope"]), lty = 3, col = "grey40")
+}
+fig_out("fig1_interaction.png", 10, 4.4, draw_interaction)
+```
+
+# Preliminary model (Part 1): raw sale price, 17 predictors
+
+Seventeen predictors: 3 numerical (`sqft100`, `lot_k`, `sale_month`) and 14 categorical
+(`division` and 13 structural/market features), plus the `sqft100 x division` interaction; 52 coefficients.
+**No transformation or other correction is applied in Part 1.**
+
+```{r model}
+f1 <- price_k ~ sqft100 * division + lot_k + stories + bedrooms + fullbath + halfbath + garage +
+  foundation + fireplace + hoa + age_restricted + wall + heat_fuel + sewer + stage + sale_month
+m1 <- lm(f1, data = train)
+s1 <- summary(m1)
+c(n = nobs(m1), coefficients = length(coef(m1)), R2 = s1$r.squared, adj_R2 = s1$adj.r.squared,
+  sigma = s1$sigma, F = unname(s1$fstatistic[1]), df1 = unname(s1$fstatistic[2]),
+  df2 = unname(s1$fstatistic[3]))
+
+# does the interaction matter? (nested F tests)
+m1_noint <- update(m1, . ~ . - sqft100:division)
+m1_noX   <- update(m1, . ~ . - sqft100:division - sqft100)
+anova(m1_noint, m1)          # partial F for the 8 interaction coefficients
+anova(m1_noX, m1)            # partial F for floor area and its interaction (9 coefficients)
+c(dR2_interaction = s1$r.squared - summary(m1_noint)$r.squared,
+  dR2_area_and_interaction = s1$r.squared - summary(m1_noX)$r.squared)
+```
+
+## Coefficient table with standard errors and 95% confidence intervals
+
+```{r coef-table}
+ci1 <- confint(m1)
+coef_tab <- data.frame(term = names(coef(m1)), estimate = coef(m1),
+                       se = s1$coefficients[, "Std. Error"], lower95 = ci1[, 1], upper95 = ci1[, 2],
+                       t = s1$coefficients[, "t value"], p = s1$coefficients[, "Pr(>|t|)"],
+                       row.names = NULL)
+knitr::kable(coef_tab, digits = c(0, 3, 3, 3, 3, 2, 4),
+             caption = "All 52 coefficients of the preliminary model (price in $1000s)")
+```
+
+## Slope of price on floor area in each division
+
+Each division's slope is $\hat\beta_{\text{sqft100}} + \hat\beta_{\text{sqft100:division}_g}$
+(the reference division, South Atlantic, has no interaction term). Its standard error comes from
+$\mathbf{L}^\top \widehat{\operatorname{Var}}(\hat{\boldsymbol\beta}) \mathbf{L}$.
+
+```{r division-slopes}
+V1 <- vcov(m1)
+slope_tab <- t(sapply(division_levels, function(g) {
+  L <- setNames(numeric(length(coef(m1))), names(coef(m1)))
+  L["sqft100"] <- 1
+  if (g != "SouthAtlantic") L[paste0("sqft100:division", g)] <- 1
+  est <- sum(L * coef(m1)); se <- sqrt(drop(t(L) %*% V1 %*% L))
+  tq <- qt(0.975, df.residual(m1))
+  c(n = sum(train$division == g), slope = est, se = se, lower95 = est - tq * se,
+    upper95 = est + tq * se, p = 2 * pt(-abs(est / se), df.residual(m1)))
+}))
+knitr::kable(slope_tab, digits = c(0, 2, 2, 2, 2, 4),
+             caption = "Adjusted slope of sale price ($1000s) per extra 100 sq ft, by division")
+```
+
+# Residual analysis of the preliminary model (no corrections)
+
+```{r residual-quantities}
+e1 <- resid(m1); yhat1 <- fitted(m1); r1 <- rstandard(m1)
+num_preds <- c("sqft100", "lot_k", "sale_month")
+# readable labels for the figures (the proposal shows these plots)
+num_lab <- c(sqft100 = "Floor area (100 sq ft)", lot_k = "Lot size (1000 sq ft)",
+             sale_month = "Month of sale")
+num_short <- c(sqft100 = "floor area", lot_k = "lot size", sale_month = "month of sale")
+cat_lab <- c(division = "Census division", stories = "Stories", bedrooms = "Bedrooms",
+             fullbath = "Full bathrooms", halfbath = "Half bathrooms", garage = "Garage",
+             foundation = "Foundation", fireplace = "Fireplaces", hoa = "Homeowners' association",
+             age_restricted = "Age-restricted community", wall = "Exterior wall", heat_fuel = "Heating fuel",
+             sewer = "Sewer", stage = "Construction stage at sale")
+level_lab <- function(v) {
+  l <- levels(train[[v]])
+  if (v == "division") return(c("S Atlantic", "New England", "Mid Atlantic", "E N Central", "W N Central",
+                                "E S Central", "W S Central", "Mountain", "Pacific"))
+  map <- c("2orless" = "2 or fewer", "1orless" = "1 or fewer", "3plus" = "3+", "4plus" = "4+", "5plus" = "5+",
+           "2plus" = "2+", "1car" = "1-car", "2car" = "2-car", "fibercement" = "fiber cement",
+           "under_constr" = "under constr.", "not_started" = "not started", "septic" = "septic/other",
+           "crawl" = "crawl space")
+  if (v == "garage") map["3plus"] <- "3+-car"
+  ifelse(l %in% names(map), map[l], l)
+}
+cat_preds <- names(factor_levels)
+```
+
+## Condition 1 (Y vs fitted) and Condition 2 (pairs of numerical predictors)
+
+```{r conditions, fig.width = 8, fig.height = 6.6}
+draw_conditions <- function() {
+  par(mfrow = c(2, 2), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(yhat1, train$price_k, pch = 16, cex = 0.4, col = pt_col,
+       xlab = "Fitted sale price ($1000s)", ylab = "Observed sale price ($1000s)",
+       main = "Condition 1: Y vs fitted values", cex.main = 1)
+  abline(0, 1, lty = 2)
+  lines(lowess(yhat1, train$price_k, f = 0.3), col = ln_col, lwd = 2)
+  prs <- combn(num_preds, 2)
+  for (j in seq_len(ncol(prs))) {
+    a <- prs[1, j]; b <- prs[2, j]
+    xa <- train[[a]]; xb <- train[[b]]
+    if (b == "sale_month") xb <- jitter(xb, amount = 0.25)
+    plot(xa, xb, pch = 16, cex = 0.4, col = pt_col, xlab = num_lab[a], ylab = num_lab[b],
+         main = sprintf("Condition 2: %s vs %s (r = %.2f)", num_short[b], num_short[a],
+                        cor(train[[a]], train[[b]])),
+         cex.main = 1)
+    lines(lowess(train[[a]], train[[b]], f = 0.3), col = ln_col, lwd = 2)
+  }
+}
+set.seed(302)  # for the jitter of sale_month in the plot only
+fig_out("fig2_conditions.png", 8, 6.6, draw_conditions)
+cor(train[, num_preds])
+```
+
+## Residuals vs fitted values, scale-location, normal QQ, and residuals vs each numerical predictor
+
+```{r residual-grid, fig.width = 10, fig.height = 6.6}
+draw_residuals <- function() {
+  par(mfrow = c(2, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(yhat1, e1, pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted value ($1000s)",
+       ylab = "Residual ($1000s)", main = "Residuals vs fitted", cex.main = 1)
+  abline(h = 0, lty = 2); lines(lowess(yhat1, e1, f = 0.3), col = ln_col, lwd = 2)
+  plot(yhat1, sqrt(abs(r1)), pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted value ($1000s)",
+       ylab = "sqrt(|standardized residual|)", main = "Scale-location", cex.main = 1)
+  lines(lowess(yhat1, sqrt(abs(r1)), f = 0.3), col = ln_col, lwd = 2)
+  qqnorm(r1, pch = 16, cex = 0.4, col = pt_col, main = "Normal QQ plot of standardized residuals",
+         cex.main = 1)
+  qqline(r1, col = ln_col, lwd = 2)
+  for (v in num_preds) {
+    plot(train[[v]], e1, pch = 16, cex = 0.4, col = pt_col, xlab = num_lab[v], ylab = "Residual ($1000s)",
+         main = paste("Residuals vs", num_short[v]), cex.main = 1)
+    abline(h = 0, lty = 2); lines(lowess(train[[v]], e1, f = 0.3), col = ln_col, lwd = 2)
+  }
+}
+fig_out("fig3_residuals.png", 10, 6.6, draw_residuals)
+```
+
+## Residuals by each categorical predictor
+
+Boxes show the residual distribution in each level (whiskers at 1.5 IQR; individual outlying points are
+not drawn to keep the boxes readable -- see the QQ plot for the tails). The title gives the ratio of the
+largest to the smallest residual SD across levels.
+
+```{r residual-boxplots, fig.width = 10, fig.height = 13}
+sd_ratio <- sapply(cat_preds, function(v) {
+  s <- tapply(e1, train[[v]], sd); max(s) / min(s)
+})
+draw_boxplots <- function() {
+  par(mfrow = c(5, 3), mar = c(7, 5, 3, 1))
+  for (v in cat_preds) {
+    boxplot(e1 ~ train[[v]], names = level_lab(v), outline = FALSE, las = 2, cex.axis = 0.85, xlab = "",
+            ylab = "", col = "grey90",
+            main = sprintf("%s (SD ratio %.1f)", cat_lab[v], sd_ratio[v]), cex.main = 1)
+    abline(h = 0, col = ln_col, lty = 2)
+    mtext("Residual ($1000s)", side = 2, line = 3.6, cex = 0.7)
+  }
+  hist(r1, breaks = 80, col = "grey80", border = "white", xlab = "Standardized residual",
+       main = "Histogram of standardized residuals", cex.main = 1)
+}
+fig_out("fig4_resid_by_categorical.png", 10, 13, draw_boxplots)
+```
+
+## Numerical evidence for the assumption checks
+
+```{r assumption-numbers}
+# Breusch-Pagan (Koenker, studentized) statistic computed by hand: n * R^2 of e^2 on the design matrix
+bp_koenker <- function(m) {
+  e2 <- resid(m)^2; X <- model.matrix(m)
+  aux <- lm.fit(X, e2)
+  r2 <- 1 - sum(aux$residuals^2) / sum((e2 - mean(e2))^2)
+  LM <- length(e2) * r2; df <- ncol(X) - 1
+  c(LM = LM, df = df, p = pchisq(LM, df, lower.tail = FALSE))
+}
+bp1 <- bp_koenker(m1)
+lev_div <- leveneTest(y = e1, group = train$division)          # Brown-Forsythe (median-centred) version
+checks <- c(cor_Y_fitted = cor(train$price_k, yhat1),
+            max_abs_cor_numeric_predictors = max(abs(cor(train[, num_preds])[upper.tri(diag(3))])),
+            resid_skewness = skew(e1), resid_excess_kurtosis = exkurt(e1),
+            BP_LM = unname(bp1["LM"]), BP_df = unname(bp1["df"]), BP_p = unname(bp1["p"]),
+            levene_division_F = lev_div[1, "F value"], levene_division_p = lev_div[1, "Pr(>F)"],
+            max_sd_ratio_division = unname(sd_ratio["division"]),
+            n_abs_std_resid_gt_4 = sum(abs(r1) > 4), max_abs_std_resid = max(abs(r1)))
+round(checks, 4)
+round(sd_ratio, 2)
+# errors across time: mean residual by sale month (a trend would suggest time dependence)
+round(tapply(e1, train$sale_month, mean), 1)
+```
+
+## Conclusions for each assumption (no corrections made in Part 1)
+
+* **Condition 1 (Y vs fitted): approximately holds.** The observed prices scatter around a single
+  increasing curve close to the identity line (correlation `r sprintf("%.2f", checks["cor_Y_fitted"])`),
+  but the spread widens sharply at high fitted values. Because both conditions hold reasonably, the
+  residual plots can be used to diagnose which assumption fails.
+* **Condition 2 (numerical predictors vs each other): holds.** The pairwise plots show no curved
+  patterns; the largest absolute correlation among `sqft100`, `lot_k` and `sale_month` is
+  `r sprintf("%.2f", checks["max_abs_cor_numeric_predictors"])`.
+* **Linearity: mildly violated.** The LOWESS curve of residuals vs fitted values is slightly U-shaped, and
+  residuals vs `sqft100` bend away from zero at the largest floor areas. `lot_k` and `sale_month` show no
+  systematic pattern.
+* **Constant variance: clearly violated.** Residuals vs fitted values fan out (funnel shape) and the
+  scale-location curve rises steadily. The Breusch-Pagan (Koenker) statistic is
+  `r sprintf("%.0f", checks["BP_LM"])` on `r checks["BP_df"]` df; residual SDs differ across divisions by a
+  factor of `r sprintf("%.1f", checks["max_sd_ratio_division"])` (Levene p =
+  `r format(checks["levene_division_p"], digits = 2)`), and also across stories, bathrooms and other levels.
+* **Normality: clearly violated.** The QQ plot has a long, steep upper tail; residual skewness is
+  `r sprintf("%.2f", checks["resid_skewness"])` and excess kurtosis
+  `r sprintf("%.1f", checks["resid_excess_kurtosis"])`, with `r checks["n_abs_std_resid_gt_4"]`
+  standardized residuals beyond +/-4. Part of the tail is caused by the Census top-coding of prices.
+* **Uncorrelated errors: plausible by design, cannot be fully tested.** SOC is a probability sample of
+  building permits, each row is a different house, and all rows are one cross-section (2025 contracts);
+  the order of houses in the file is randomly scrambled within division, so a residual-vs-order plot
+  carries no information. Residuals show no trend across sale months. The public file has no subdivision
+  or builder identifier, so correlation among houses from the same development cannot be checked; we
+  note this as a limitation.
+
+These violations (right skew, heavy tail, and variance increasing with the mean) will be addressed in
+Part 2, for example with a Box-Cox/log transformation of price; nothing is corrected here.
+
+```{r session}
+sessionInfo()
+```
