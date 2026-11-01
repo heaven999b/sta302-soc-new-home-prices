@@ -2,6 +2,10 @@
 
 ## 2026-11-02
 
+- Added a complete repository-home navigation table for cloud documents, code, data, figures and outputs.
+- Synced Haiwen Yi’s first three task assignments into all English proposal formats.
+- Updated OneDrive submission link and removed stale submission-status claims.
+
 - Synced the revised English proposal in Markdown, HTML, PDF and Word.
 - Added English analysis/data supplements and the verified course checklist.
 - Preserved member/contribution/owner blanks and documented submission prerequisites.

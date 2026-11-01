@@ -1,5 +1,13 @@
 # 面积 × Census division：美国新建住宅售价（SOC 2025）
 
+## 文件入口
+
+[完整材料导航](README.md#start-here--group-62-materials) · [Part 0](https://docs.google.com/document/d/1jENKQ83oF1fpZYHq7wk_R3dypHRt6pBYv2vRfdR1l7Q/edit) · [Part 1](https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit) · [共享文件夹](https://drive.google.com/drive/folders/14TQrSwZvfd9tc5uYxqN5S1h_wcm8roYY) · [OneDrive 数据包](https://utoronto-my.sharepoint.com/:f:/g/personal/heaven_yi_mail_utoronto_ca/IgAFTwJSFUDmQobtA7uqUvTmAcypZCzwoALVw3rPRipUDVI?e=uGPNcc)
+
+[代码](Part1_Code.Rmd) · [数据](data/) · [图表](figures/) · [提案 PDF](proposal/Proposal_Part1_EN.pdf) · [最新提交清单](submission/FIRST_SUBMISSION.txt)
+
+前三项分析任务已由 Haiwen Yi 负责；其他组员信息和后四项负责人待补。OneDrive 已上传。下方历史待办请以最新提交清单为准。
+
 > 2026-11-02 更新：最新版英文 proposal 的 Markdown、HTML、PDF、Word 均已同步至 `proposal/`。英文研究补充、数据汇总和课程清单在 `docs/`，本次重跑记录在 `verification/2026-11-02/`。原中文稿及下方旧状态保留作历史记录；请以英文 README 顶部的最新版入口为准。
 
 STA302H1（Methods of Data Analysis I），多伦多大学，2026 秋季学期期末项目 —— 三个候选方案之一（方案一）。

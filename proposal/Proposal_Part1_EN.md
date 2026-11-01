@@ -100,9 +100,9 @@ Freeze the final model before one test-set evaluation. Disclose full-sample desc
 
 | Completion date in 2026 | Task | Responsible member |
 |---|---|---|
-| November 12 | Transformations and diagnostics | __________ |
-| November 19 | Variable selection and influence checks | __________ |
-| November 22 | Robustness and frozen-model validation | __________ |
+| November 12 | Transformations and diagnostics | Haiwen Yi |
+| November 19 | Variable selection and influence checks | Haiwen Yi |
+| November 22 | Robustness and frozen-model validation | Haiwen Yi |
 | November 27 | Poster draft | __________ |
 | November 30 | Poster review | __________ |
 | December 2 | Record and review presentation | __________ |

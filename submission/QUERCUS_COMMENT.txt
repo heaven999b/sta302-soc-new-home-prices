@@ -1,5 +1,6 @@
 Group 62 — SOC new home prices
 
-UofT OneDrive data folder: ____________________
+Original and cleaned data, fixed train/test split, variable documentation and Rmd:
+https://utoronto-my.sharepoint.com/:f:/g/personal/heaven_yi_mail_utoronto_ca/IgAFTwJSFUDmQobtA7uqUvTmAcypZCzwoALVw3rPRipUDVI?e=uGPNcc
 
-Before submitting: replace the blank with the real link and verify access for anyone in UofT with the link. The folder must include original and cleaned CSVs, split_ids.csv and variable documentation.
+Access: UofT users with the link.

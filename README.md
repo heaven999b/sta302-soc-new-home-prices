@@ -1,12 +1,29 @@
 # Floor area × Census division: sale prices of new U.S. homes (SOC 2025)
 
+## Start here — Group 62 materials
+
+| Material | Link |
+|---|---|
+| Part 0 teamwork agreement — collaborative Google Doc | [Open Part 0](https://docs.google.com/document/d/1jENKQ83oF1fpZYHq7wk_R3dypHRt6pBYv2vRfdR1l7Q/edit) |
+| Part 1 proposal — collaborative Google Doc | [Open Part 1](https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit) |
+| Proposal snapshot — updated 2 November 2026 | [PDF](proposal/Proposal_Part1_EN.pdf) · [Word](proposal/Proposal_Part1_EN.docx) · [Markdown](proposal/Proposal_Part1_EN.md) |
+| Shared submission materials | [Google Drive folder](https://drive.google.com/drive/folders/14TQrSwZvfd9tc5uYxqN5S1h_wcm8roYY) |
+| Course data package — UofT sign-in required | [OneDrive folder](https://utoronto-my.sharepoint.com/:f:/g/personal/heaven_yi_mail_utoronto_ca/IgAFTwJSFUDmQobtA7uqUvTmAcypZCzwoALVw3rPRipUDVI?e=uGPNcc) |
+| Executable analysis | [Part 1 Rmd](Part1_Code.Rmd) · [Part 2 Rmd](Part2_Analysis.Rmd) |
+| Original data / cleaned data / fixed split | [Original](data/original/) · [Cleaned](data/cleaned/) · [Split IDs](data/split_ids.csv) |
+| Figures and analysis output | [Figures](figures/) · [Part 1 output](Part1_Code.html) · [Part 2 output](Part2_Analysis.html) |
+| Research documentation and checks | [Documents](docs/) · [Rerun verification](verification/2026-11-02/) |
+| What to submit and what remains | [First-submission guide](submission/FIRST_SUBMISSION.txt) · [Submission comment](submission/QUERCUS_COMMENT.txt) |
+
+Google Docs are the live editing copies; repository PDF/Word files are dated snapshots. GitHub may offer a download instead of previewing large HTML or data files. To obtain the whole project, use **Code → Download ZIP** or clone this repository.
+
 ## Latest English revision — 2 November 2026
 
 Use the revised [proposal PDF](proposal/Proposal_Part1_EN.pdf), [editable Word document](proposal/Proposal_Part1_EN.docx), [Markdown](proposal/Proposal_Part1_EN.md) or [HTML](proposal/Proposal_Part1_EN.html). These supersede the September English proposal. The Chinese translation remains a dated historical draft.
 
 Read the [English analysis supplement](docs/ANALYSIS_SUPPLEMENT_EN.md), [expanded data summaries](docs/DATA_SUMMARIES_EN.md), [course checklist](docs/COURSE_REQUIREMENTS_EN.md), and [rerun verification](verification/2026-11-02/README.md). The [complete three-project portfolio](https://github.com/heaven999b/sta302-research-project/tree/main/reports/english-2026-11-02) and [online reading copy](https://chatgpt.com/space/page_2de0a2753be081919dd0918aba49e029) provide the comparison.
 
-**Selected project:** Haiwen has chosen SOC for Group 62. Edit the [Google Docs proposal](https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit); the PDF and Word above are its current exports. Haiwen Yi's confirmed contribution is recorded. Other members' names/contributions and all named task owners remain blank. Use the [first-submission preparation guide](submission/FIRST_SUBMISSION.txt). The signed Part 0 agreement and verified UofT OneDrive link are still required; no course submission has been made.
+**Selected project:** SOC, Group 62. Haiwen Yi's contribution and the first three analysis-task assignments are filled in. Other members' contributions and the four poster/presentation/submission task owners remain blank. Part 0 contains the agreed English teamwork text and Haiwen's information; other members must complete their entries. The UofT OneDrive data package has been uploaded and its school-link access checked. No Quercus submission has been made. See the [first-submission guide](submission/FIRST_SUBMISSION.txt).
 
 **Version policy:** keep future data, code, figures and outputs in this repository. `Part1_Code.Rmd` and `Part2_Analysis.Rmd` are the executable sources; their HTML files contain analysis outputs. `probe/` is historical exploration. No retrospective weekly reports have been invented. Part 2 working notes and the historical design remain partly Chinese.
 
@@ -117,14 +134,14 @@ pandoc Proposal_Part1_EN.md -s --css proposal.css -o Proposal_Part1_EN.html
 
 ## Status and to-do
 
-- [x] Part 1 code, figures and cleaned data; Part 2 analysis on the training set; R-vs-Python verification.
-- [x] English proposal draft within all word limits (Introduction 385/400, Data description 278/300, Ethics 167/200, Preliminary results 356/400, Plan 257/300).
-- [ ] Fill in group number, member names, contributions and Gantt-chart owners.
-- [ ] Replace the generic ethics wording with Module 3 terminology.
-- [ ] Read the three papers in full to confirm the summaries (Rosen, 1974 has no available abstract).
-- [ ] Upload the original and cleaned CSVs plus `data/split_ids.csv` to UofT OneDrive and put the link in the Quercus submission comment.
+- [x] Group 62 selected; Part 1 code, figures, data, English proposal and analysis supplements prepared.
+- [x] Haiwen Yi's contribution and first three task assignments recorded; Part 0 text and Haiwen's entry completed.
+- [x] Original/cleaned data, fixed split and metadata uploaded to UofT OneDrive; school-link access checked.
+- [ ] Other members complete Part 0 details and Part 1 contributions.
+- [ ] Assign the four remaining plan tasks: poster draft, poster review, presentation recording/review, and final checks/submission.
+- [ ] Group reviews both documents; export fresh final PDFs after all edits.
+- [ ] One member submits Part 0 PDF, Part 1 PDF and Rmd on Quercus, adds the OneDrive link, and uploads Part 0 to the group page.
 
-Details: [`docs/TODO.md`](docs/TODO.md) and [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## References
 

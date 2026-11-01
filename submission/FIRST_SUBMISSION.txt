@@ -1,22 +1,25 @@
-STA302 Group 62 — Selected SOC project — First submission preparation
+STA302 Group 62 — SOC — First submission preparation
+Updated 2 November 2026
 
-Current collaborative proposal: https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit
-Repository: https://github.com/heaven999b/sta302-soc-new-home-prices
+LIVE DOCUMENTS AND MATERIALS
+Part 0: https://docs.google.com/document/d/1jENKQ83oF1fpZYHq7wk_R3dypHRt6pBYv2vRfdR1l7Q/edit
+Part 1: https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit
+Shared materials: https://drive.google.com/drive/folders/14TQrSwZvfd9tc5uYxqN5S1h_wcm8roYY
+UofT OneDrive: https://utoronto-my.sharepoint.com/:f:/g/personal/heaven_yi_mail_utoronto_ca/IgAFTwJSFUDmQobtA7uqUvTmAcypZCzwoALVw3rPRipUDVI?e=uGPNcc
 
 PREPARED
-The English proposal includes Contributions, Introduction, Data description, Ethics discussion, Preliminary results, Plan, Bibliography and the complete preliminary-model coefficient appendix. PDF and Word are current Google Docs exports. Haiwen Yi's confirmed contribution is “Research design, statistical analysis, and report writing.” Group 62 is set in the Rmd metadata. The proposal has 4 figures and 5 tables. The data folder contains original and cleaned CSVs, the fixed split, and the variable documentation. Additional results and later analysis remain in GitHub.
+The English proposal, matching Rmd, original/cleaned data, fixed split, figures and analysis outputs are in this repository. The proposal PDF/Word snapshots include Haiwen Yi's three contributions and the first three analysis-task assignments. Part 0's English teamwork text and Haiwen's entry are complete in Google Docs. The OneDrive data package has been uploaded and access checked for UofT users with the link.
 
-TEAM INPUTS LEFT BLANK
-1. Contributions (proposal page 1): the other members' Quercus names and their actual contributions to this proposal. Three empty rows are retained; adjust the number if necessary.
-2. Plan (proposal page 8): the responsible member(s) for each of the seven dated tasks. Dates are proposed and should be agreed by the group.
-3. Part 0 agreement: use the official unsigned template from Quercus (included only in the local preparation package). Fill Group 62 in both group fields, agree on the group rules, and complete each member's Quercus name, UofT email address and date signed. Haiwen Yi is the only confirmed name. No signatures or agreements have been supplied on anyone's behalf.
-4. Submission comment: leave the UofT OneDrive sharing link blank until uploaded and access checked. A comment template is in QUERCUS_COMMENT.txt.
+REMAINING TEAM INPUTS
+1. Other members add their Quercus names, UofT emails and signing dates to Part 0.
+2. Other members add their names and actual proposal contributions to Part 1.
+3. Assign poster draft (November 27), poster review (November 30), presentation recording/review (December 2), and final checks/submission (December 3).
+4. Everyone reviews both documents and confirms the schedule. Export fresh final PDFs after all edits; older Drive PDF/Word copies may predate the latest edits.
 
-SUBMISSION STEPS
-Complete the blank proposal fields in Google Docs, export fresh PDF/Word and replace the preparation copies. Have every member complete/sign the agreement; save its PDF and upload it to the Quercus group page as well as the assignment. Upload the repository files data/original/soc25.csv, data/cleaned/soc_clean.csv, data/split_ids.csv and data/original/socmicro_info.pdf to UofT OneDrive, preserving data/ and its subfolders; set access to anyone in UofT with the link and check the link.
-One member submits the signed Part 0 PDF, final Part 1 proposal PDF and Part1_Code.Rmd, adding the OneDrive link in the submission comment. This preparation ZIP, GitHub and Google Docs do not replace those components. No course submission or OneDrive upload has been made.
+SUBMIT
+One member submits the completed Part 0 PDF, final Part 1 PDF and Part1_Code.Rmd to Quercus, adding the OneDrive URL from QUERCUS_COMMENT.txt. Also upload Part 0 PDF to the Quercus group page. Google Docs and GitHub are collaboration resources, not the submission itself. No Quercus submission has been made.
 
-REPRODUCTION
-Keep Part1_Code.Rmd next to data/. Install R packages car, rmarkdown and knitr, with Pandoc available; knit in RStudio or run rmarkdown::render("Part1_Code.Rmd") from the package root. It creates figures/ and rewrites data/cleaned/soc_clean.csv. Part 2 is not required for this first submission. Future code, data, figures and results should continue to be committed to the selected repository.
+REPRODUCE
+Keep Part1_Code.Rmd alongside data/. With R, car, rmarkdown, knitr and Pandoc installed, knit in RStudio or run rmarkdown::render("Part1_Code.Rmd") from the repository root. Part 2 is not required for this first submission.
 
-Course assignment: https://q.utoronto.ca/courses/462653/assignments/1779637
+Assignment: https://q.utoronto.ca/courses/462653/assignments/1779637
