@@ -1,5 +1,16 @@
 # Floor area × Census division: sale prices of new U.S. homes (SOC 2025)
 
+## Latest English revision — 2 November 2026
+
+Use the revised [proposal PDF](proposal/Proposal_Part1_EN.pdf), [editable Word document](proposal/Proposal_Part1_EN.docx), [Markdown](proposal/Proposal_Part1_EN.md) or [HTML](proposal/Proposal_Part1_EN.html). These supersede the September English proposal. The Chinese translation remains a dated historical draft.
+
+Read the [English analysis supplement](docs/ANALYSIS_SUPPLEMENT_EN.md), [expanded data summaries](docs/DATA_SUMMARIES_EN.md), [course checklist](docs/COURSE_REQUIREMENTS_EN.md), and [rerun verification](verification/2026-11-02/README.md). The [complete three-project portfolio](https://github.com/heaven999b/sta302-research-project/tree/main/reports/english-2026-11-02) and [online reading copy](https://chatgpt.com/space/page_2de0a2753be081919dd0918aba49e029) provide the comparison.
+
+**Submission status:** Group 62 is recorded. Member contributions and named task owners remain blank at the group's request. Select one project, complete and sign the Part 0 agreement, and supply the UofT OneDrive data link before submission. No course submission, final poster/video, or individual reflection is represented as complete. Historical notes below describe the earlier repository version; use the linked November checklist for current document status.
+
+**Version policy:** keep future data, code, figures and outputs in this repository. `Part1_Code.Rmd` and `Part2_Analysis.Rmd` are the executable sources; their HTML files contain analysis outputs. `probe/` is historical exploration. No retrospective weekly reports have been invented. Part 2 working notes and the historical design remain partly Chinese.
+
+
 STA302H1 (Methods of Data Analysis I), University of Toronto, Fall 2026 — final project, candidate 1 of 3.
 
 > 中文版见 [README_zh.md](README_zh.md)。完整的中文研究设计见 [design/research_design.md](design/research_design.md)。

@@ -1,5 +1,7 @@
 # Proposal Part 1 中英对照（方案一：SOC 新房售价）
 
+> 历史中文对照稿（2026-09-30），尚未同步 2026-11-02 的英文修订。当前版本请使用 [English proposal](Proposal_Part1_EN.md)。
+
 > 英文原稿：`Proposal_Part1_EN.md`（提交用 PDF：`Proposal_Part1_EN.pdf`）。本文件逐段对照翻译，供组员阅读；**提交以英文稿为准**。
 > 标注说明：【需读原文核对】文献概括需要读原文确认；【TODO：换成 Module 3 术语】伦理部分待替换术语；【待办】需要组员补充的信息。
 

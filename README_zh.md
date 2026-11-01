@@ -1,5 +1,7 @@
 # 面积 × Census division：美国新建住宅售价（SOC 2025）
 
+> 2026-11-02 更新：最新版英文 proposal 的 Markdown、HTML、PDF、Word 均已同步至 `proposal/`。英文研究补充、数据汇总和课程清单在 `docs/`，本次重跑记录在 `verification/2026-11-02/`。原中文稿及下方旧状态保留作历史记录；请以英文 README 顶部的最新版入口为准。
+
 STA302H1（Methods of Data Analysis I），多伦多大学，2026 秋季学期期末项目 —— 三个候选方案之一（方案一）。
 
 > English version: [README.md](README.md)。完整的中文研究设计见 [design/research_design.md](design/research_design.md)；R 与 Python 数值核对见 [verification/R_vs_Python.md](verification/R_vs_Python.md)。

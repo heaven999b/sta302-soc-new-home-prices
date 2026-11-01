@@ -1,5 +1,14 @@
 # 变更记录
 
+## 2026-11-02
+
+- Synced the revised English proposal in Markdown, HTML, PDF and Word.
+- Added English analysis/data supplements and the verified course checklist.
+- Preserved member/contribution/owner blanks and documented submission prerequisites.
+- Archived the successful Part 1/2 rerun logs and byte-identical cleaned-data checks.
+- No model, dataset, split or test-evaluation policy was changed.
+
+
 ## 2026-09-30
 
 - **探针**：组 1 用 Python（statsmodels）在 SOC 2025 微观数据上探测“面积 × Census division”。在任何建模之前用 `default_rng(302)` 固定 70/30 划分，只保存测试集 ID；所有拟合只用训练集。脚本和结果见 `probe/`。

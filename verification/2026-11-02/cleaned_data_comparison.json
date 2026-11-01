@@ -1,0 +1,10 @@
+{
+  "data/cleaned/soc2024_clean.csv": {
+    "exists": true,
+    "byte_identical": true
+  },
+  "data/cleaned/soc_clean.csv": {
+    "exists": true,
+    "byte_identical": true
+  }
+}
