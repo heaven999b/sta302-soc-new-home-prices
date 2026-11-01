@@ -4,7 +4,7 @@ Current collaborative proposal: https://docs.google.com/document/d/1rDqK7jcE0h9s
 Repository: https://github.com/heaven999b/sta302-soc-new-home-prices
 
 PREPARED
-The English proposal includes Contributions, Introduction, Data description, Ethics discussion, Preliminary results, Plan, Bibliography and the complete preliminary-model coefficient appendix. PDF and Word are current Google Docs exports. Haiwen Yi's confirmed contribution is “Research design and statistical analysis.” Group 62 is set in the Rmd metadata. The proposal has 4 figures and 5 tables. The data folder contains original and cleaned CSVs, the fixed split, and the variable documentation. Additional results and later analysis remain in GitHub.
+The English proposal includes Contributions, Introduction, Data description, Ethics discussion, Preliminary results, Plan, Bibliography and the complete preliminary-model coefficient appendix. PDF and Word are current Google Docs exports. Haiwen Yi's confirmed contribution is “Research design, statistical analysis, and report writing.” Group 62 is set in the Rmd metadata. The proposal has 4 figures and 5 tables. The data folder contains original and cleaned CSVs, the fixed split, and the variable documentation. Additional results and later analysis remain in GitHub.
 
 TEAM INPUTS LEFT BLANK
 1. Contributions (proposal page 1): the other members' Quercus names and their actual contributions to this proposal. Three empty rows are retained; adjust the number if necessary.
