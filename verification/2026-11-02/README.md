@@ -14,3 +14,7 @@ Rscript -e 'rmarkdown::render("Part2_Analysis.Rmd")'
 ```
 
 Dependencies and data provenance are documented in the repository README. `sha256.json` fingerprints the delivered code, reports, split and cleaned data.
+
+## Selected proposal preparation
+
+The current Google Docs exports include Haiwen Yi’s confirmed contribution; other member contributions and all seven task owners remain blank. Both PDF and rendered Word were checked across all 10 pages. `Part1_Code.Rmd` now identifies Group 62 and was rendered again successfully; see `part1-group62-render.log`. The cleaned 2025 CSV remains byte-identical. The checksum file now identifies these updated delivery copies. The agreement is unsigned and OneDrive upload/access remain pending.

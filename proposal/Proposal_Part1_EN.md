@@ -8,7 +8,7 @@ Group 62
 
 | Member name | Contribution to this proposal |
 |---|---|
-| __________ | __________ |
+| Haiwen Yi | Research design and statistical analysis. |
 | __________ | __________ |
 | __________ | __________ |
 | __________ | __________ |

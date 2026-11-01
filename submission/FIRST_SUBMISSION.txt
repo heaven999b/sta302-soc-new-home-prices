@@ -1,0 +1,22 @@
+STA302 Group 62 — Selected SOC project — First submission preparation
+
+Current collaborative proposal: https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit
+Repository: https://github.com/heaven999b/sta302-soc-new-home-prices
+
+PREPARED
+The English proposal includes Contributions, Introduction, Data description, Ethics discussion, Preliminary results, Plan, Bibliography and the complete preliminary-model coefficient appendix. PDF and Word are current Google Docs exports. Haiwen Yi's confirmed contribution is “Research design and statistical analysis.” Group 62 is set in the Rmd metadata. The proposal has 4 figures and 5 tables. The data folder contains original and cleaned CSVs, the fixed split, and the variable documentation. Additional results and later analysis remain in GitHub.
+
+TEAM INPUTS LEFT BLANK
+1. Contributions (proposal page 1): the other members' Quercus names and their actual contributions to this proposal. Three empty rows are retained; adjust the number if necessary.
+2. Plan (proposal page 8): the responsible member(s) for each of the seven dated tasks. Dates are proposed and should be agreed by the group.
+3. Part 0 agreement: use the official unsigned template from Quercus (included only in the local preparation package). Fill Group 62 in both group fields, agree on the group rules, and complete each member's Quercus name, UofT email address and date signed. Haiwen Yi is the only confirmed name. No signatures or agreements have been supplied on anyone's behalf.
+4. Submission comment: leave the UofT OneDrive sharing link blank until uploaded and access checked. A comment template is in QUERCUS_COMMENT.txt.
+
+SUBMISSION STEPS
+Complete the blank proposal fields in Google Docs, export fresh PDF/Word and replace the preparation copies. Have every member complete/sign the agreement; save its PDF and upload it to the Quercus group page as well as the assignment. Upload the repository files data/original/soc25.csv, data/cleaned/soc_clean.csv, data/split_ids.csv and data/original/socmicro_info.pdf to UofT OneDrive, preserving data/ and its subfolders; set access to anyone in UofT with the link and check the link.
+One member submits the signed Part 0 PDF, final Part 1 proposal PDF and Part1_Code.Rmd, adding the OneDrive link in the submission comment. This preparation ZIP, GitHub and Google Docs do not replace those components. No course submission or OneDrive upload has been made.
+
+REPRODUCTION
+Keep Part1_Code.Rmd next to data/. Install R packages car, rmarkdown and knitr, with Pandoc available; knit in RStudio or run rmarkdown::render("Part1_Code.Rmd") from the package root. It creates figures/ and rewrites data/cleaned/soc_clean.csv. Part 2 is not required for this first submission. Future code, data, figures and results should continue to be committed to the selected repository.
+
+Course assignment: https://q.utoronto.ca/courses/462653/assignments/1779637

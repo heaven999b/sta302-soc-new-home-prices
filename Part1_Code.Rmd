@@ -1,7 +1,7 @@
 ---
 title: "STA302 Project Part 1 -- Code"
 subtitle: "Sale price of new single-family homes (Census SOC 2025): floor area x Census division"
-author: "Group [##]: Haiwen Yi, [Member 2], [Member 3], [Member 4]"
+author: "Group 62"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document:

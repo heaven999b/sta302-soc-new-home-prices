@@ -1,0 +1,5 @@
+Group 62 — SOC new home prices
+
+UofT OneDrive data folder: ____________________
+
+Before submitting: replace the blank with the real link and verify access for anyone in UofT with the link. The folder must include original and cleaned CSVs, split_ids.csv and variable documentation.

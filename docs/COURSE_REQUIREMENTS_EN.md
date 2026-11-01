@@ -28,7 +28,7 @@ The live assignment says no additional late submissions after the NQA deadline, 
 | No repairs in Part 1 results | Main proposal versus supplement | Later repairs are separated |
 | Analysis plan and diagnostics after changes | Plan | Selection, transformations, influence and reassessment |
 | Dates for analysis, poster and recording | Team schedule | Dates filled; member assignments intentionally blank |
-| Contributions | Opening table | Intentionally blank pending group completion |
+| Contributions | Opening table | Haiwen Yi confirmed; other members intentionally blank |
 | Word limits | Word-count record | Main-section headings, prose, captions and table cells checked |
 | APA citations; no R console output in proposal | Bibliographies and formatted tables | Tables are edited displays, not console dumps |
 | Reproducible Rmd | Matching repositories and local package | Part 1 and Part 2 knitted successfully for all three |

@@ -1,0 +1,56 @@
+During startup - Warning messages:
+1: Setting LC_CTYPE failed, using "C" 
+2: Setting LC_COLLATE failed, using "C" 
+3: Setting LC_TIME failed, using "C" 
+4: Setting LC_MESSAGES failed, using "C" 
+5: Setting LC_MONETARY failed, using "C" 
+
+
+processing file: Part1_Code.Rmd
+1/40                      
+2/40 [setup]              
+3/40                      
+4/40 [packages]           
+5/40                      
+6/40 [read-raw]           
+7/40                      
+8/40 [clean-function]     
+9/40                      
+10/40 [construct-function] 
+11/40                      
+12/40 [split-and-write]    
+13/40                      
+14/40 [train]              
+15/40                      
+16/40 [summary-table]      
+17/40                      
+18/40 [summary-extra]      
+19/40                      
+20/40 [fig-helper]         
+21/40                      
+22/40 [interaction-plot]   
+2026-11-02 05:47:30.706 R[5345:45752] XType: Using static font registry.
+23/40                      
+24/40 [model]              
+25/40                      
+26/40 [coef-table]         
+27/40                      
+28/40 [division-slopes]    
+29/40                      
+30/40 [residual-quantities]
+31/40                      
+32/40 [conditions]         
+33/40                      
+34/40 [residual-grid]      
+35/40                      
+36/40 [residual-boxplots]  
+37/40                      
+38/40 [assumption-numbers] 
+39/40                      
+40/40 [session]            
+output file: Part1_Code.knit.md
+
+/opt/anaconda3/envs/sta302r/bin/pandoc +RTS -K512m -RTS Part1_Code.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output Part1_Code.html --lua-filter /opt/anaconda3/envs/sta302r/lib/R/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /opt/anaconda3/envs/sta302r/lib/R/library/rmarkdown/rmarkdown/lua/latex-div.lua --lua-filter /opt/anaconda3/envs/sta302r/lib/R/library/rmarkdown/rmarkdown/lua/table-classes.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 2 --template /opt/anaconda3/envs/sta302r/lib/R/library/rmarkdown/rmd/h/default.html --syntax-highlighting none --variable highlightjs=1 --number-sections --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/v9/snjdznyj6sbbyqdb07z1x3z40000gn/T//Rtmpa5dNPF/rmarkdown-str14e117ffb129.html 
+[WARNING] Deprecated: --mathjax. Use --math-method=mathjax[:URL] instead.
+
+Output created: Part1_Code.html
