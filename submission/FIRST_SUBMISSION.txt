@@ -8,12 +8,12 @@ Shared materials: https://drive.google.com/drive/folders/14TQrSwZvfd9tc5uYxqN5S1
 UofT OneDrive: https://utoronto-my.sharepoint.com/:f:/g/personal/heaven_yi_mail_utoronto_ca/IgAFTwJSFUDmQobtA7uqUvTmAcypZCzwoALVw3rPRipUDVI?e=uGPNcc
 
 PREPARED
-The English proposal, matching Rmd, original/cleaned data, fixed split, figures and analysis outputs are in this repository. The proposal PDF/Word snapshots include Haiwen Yi's three contributions and the first three analysis-task assignments. Part 0's English teamwork text and Haiwen's entry are complete in Google Docs. The OneDrive data package has been uploaded and access checked for UofT users with the link.
+The English proposal, matching Rmd, original/cleaned data, fixed split, figures and analysis outputs are in this repository. The proposal PDF/Word snapshots include the reviewed literature and preliminary-results writing, Haiwen Yi's contribution and first three analysis-task assignments, Olivia Qi's name and poster-design assignment, and the remaining plan tasks assigned to all members. Part 0's English teamwork text and Haiwen's entry are complete in Google Docs. The OneDrive data package has been uploaded and access checked for UofT users with the link.
 
 REMAINING TEAM INPUTS
 1. Other members add their Quercus names, UofT emails and signing dates to Part 0.
 2. Other members add their names and actual proposal contributions to Part 1.
-3. Assign poster draft (November 27), poster review (November 30), presentation recording/review (December 2), and final checks/submission (December 3).
+3. Confirm the existing plan assignments: Olivia Qi for poster draft design (November 27); all members for poster review (November 30), presentation recording/review (December 2), and final checks/submission (December 3).
 4. Everyone reviews both documents and confirms the schedule. Export fresh final PDFs after all edits; older Drive PDF/Word copies may predate the latest edits.
 
 SUBMIT

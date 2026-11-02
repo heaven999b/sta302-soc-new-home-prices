@@ -23,7 +23,9 @@ Use the revised [proposal PDF](proposal/Proposal_Part1_EN.pdf), [editable Word d
 
 Read the [English analysis supplement](docs/ANALYSIS_SUPPLEMENT_EN.md), [expanded data summaries](docs/DATA_SUMMARIES_EN.md), [course checklist](docs/COURSE_REQUIREMENTS_EN.md), and [rerun verification](verification/2026-11-02/README.md). The [complete three-project portfolio](https://github.com/heaven999b/sta302-research-project/tree/main/reports/english-2026-11-02) and [online reading copy](https://chatgpt.com/space/page_2de0a2753be081919dd0918aba49e029) provide the comparison.
 
-**Selected project:** SOC, Group 62. Haiwen Yi's contribution and the first three analysis-task assignments are filled in. Other members' contributions and the four poster/presentation/submission task owners remain blank. Part 0 contains the agreed English teamwork text and Haiwen's information; other members must complete their entries. The UofT OneDrive data package has been uploaded and its school-link access checked. No Quercus submission has been made. See the [first-submission guide](submission/FIRST_SUBMISSION.txt).
+The latest writing sync incorporates three review rounds: Rosen (1974), Gyourko and Saiz (2006), and Sirmans et al. (2006) motivate the proposal; the preliminary results explain dollar slopes, regional contrasts and diagnostic limitations. Introduction: 342 words. Preliminary results: 313 words, or 362 including its table/figure captions (whitespace counts). See the [writing-sync verification](verification/2026-11-02-writing-sync/README.md).
+
+**Selected project:** SOC, Group 62. The snapshot preserves the latest live team edits: Haiwen Yi's contribution and first three analysis assignments, Olivia Qi's name and poster-design assignment, and the remaining plan tasks assigned to all members. Other members' names/contributions still need completion where blank. Part 0 contains the agreed English teamwork text and Haiwen's information; other members must complete their entries. The UofT OneDrive data package has been uploaded and its school-link access checked. No Quercus submission has been made. See the [first-submission guide](submission/FIRST_SUBMISSION.txt).
 
 **Version policy:** keep future data, code, figures and outputs in this repository. `Part1_Code.Rmd` and `Part2_Analysis.Rmd` are the executable sources; their HTML files contain analysis outputs. `probe/` is historical exploration. No retrospective weekly reports have been invented. Part 2 working notes and the historical design remain partly Chinese.
 
@@ -121,7 +123,7 @@ To rebuild the proposal after editing `proposal/Proposal_Part1_EN.md`:
 
 ```bash
 cd proposal
-pandoc Proposal_Part1_EN.md -s --css proposal.css -o Proposal_Part1_EN.html
+pandoc Proposal_Part1_EN.md --from=markdown-tex_math_dollars -s --embed-resources --css proposal.css -o Proposal_Part1_EN.html
 # then print Proposal_Part1_EN.html to PDF (e.g. headless Chrome with --no-pdf-header-footer) and check every page
 ```
 
@@ -138,7 +140,7 @@ pandoc Proposal_Part1_EN.md -s --css proposal.css -o Proposal_Part1_EN.html
 - [x] Haiwen Yi's contribution and first three task assignments recorded; Part 0 text and Haiwen's entry completed.
 - [x] Original/cleaned data, fixed split and metadata uploaded to UofT OneDrive; school-link access checked.
 - [ ] Other members complete Part 0 details and Part 1 contributions.
-- [ ] Assign the four remaining plan tasks: poster draft, poster review, presentation recording/review, and final checks/submission.
+- [x] Preserve the live plan assignments: Olivia Qi for poster design; all members for poster review, recording/review, and final checks/submission.
 - [ ] Group reviews both documents; export fresh final PDFs after all edits.
 - [ ] One member submits Part 0 PDF, Part 1 PDF and Rmd on Quercus, adds the OneDrive link, and uploads Part 0 to the group page.
 
@@ -148,6 +150,7 @@ pandoc Proposal_Part1_EN.md -s --css proposal.css -o Proposal_Part1_EN.html
 - Glaeser, E. L., Gyourko, J., & Saks, R. (2005). Why is Manhattan so expensive? Regulation and the rise in housing prices. *The Journal of Law and Economics, 48*(2), 331–369. https://doi.org/10.1086/429979
 - Gyourko, J., & Saiz, A. (2006). Construction costs and the supply of housing structure. *Journal of Regional Science, 46*(4), 661–680. https://doi.org/10.1111/j.1467-9787.2006.00472.x
 - Rosen, S. (1974). Hedonic prices and implicit markets: Product differentiation in pure competition. *Journal of Political Economy, 82*(1), 34–55. https://doi.org/10.1086/260169
+- Sirmans, G. S., MacDonald, L., Macpherson, D. A., & Zietz, E. N. (2006). The value of housing characteristics: A meta analysis. *The Journal of Real Estate Finance and Economics, 33*, 215–240. https://doi.org/10.1007/s11146-006-9983-5
 - U.S. Census Bureau. (2026). *Survey of Construction (SOC) microdata: 2025 annual file* [Data set]. https://www.census.gov/construction/chars/microdata.html
 - U.S. Census Bureau. (n.d.). *Survey of Construction microdata files: General information and variable descriptions*. https://www.census.gov/construction/chars/pdf/socmicro_info.pdf
 

@@ -27,8 +27,8 @@ The live assignment says no additional late submissions after the NQA deadline, 
 | Preliminary estimates with uncertainty | Table 2; housing coefficient appendix | Conventional SEs/intervals; violations disclosed |
 | No repairs in Part 1 results | Main proposal versus supplement | Later repairs are separated |
 | Analysis plan and diagnostics after changes | Plan | Selection, transformations, influence and reassessment |
-| Dates for analysis, poster and recording | Team schedule | Dates filled; Haiwen Yi assigned to the first three analysis tasks; four remaining owners blank |
-| Contributions | Opening table | Haiwen Yi confirmed; other members intentionally blank |
+| Dates for analysis, poster and recording | Team schedule | Dates filled; Haiwen Yi assigned to the first three analysis tasks, Olivia Qi to poster design, and all members to the final three tasks |
+| Contributions | Opening table | Haiwen Yi's entry and Olivia Qi's name preserved; remaining names/contributions need completion |
 | Word limits | Word-count record | Main-section headings, prose, captions and table cells checked |
 | APA citations; no R console output in proposal | Bibliographies and formatted tables | Tables are edited displays, not console dumps |
 | Reproducible Rmd | Matching repositories and local package | Part 1 and Part 2 knitted successfully for all three |
@@ -41,7 +41,7 @@ The dataset minimum refers to each full cleaned dataset; the salary proposal tra
 
 One group member submits the signed teamwork-agreement PDF, the selected proposal PDF and its matching Rmd. Original and cleaned CSVs go to UofT OneDrive with access set to anyone in UofT with the link; the link belongs in the Quercus submission comment. Include split_ids.csv with the data because the Rmd reads the fixed assignment. For IPEDS, identify the removal of unused chief-administrator name/title fields from repository directory copies.
 
-The three-project portfolio, Google Docs and GitHub are supporting collaboration resources. They do not replace those required components. Other members’ contributions, four remaining task owners, completion of the group agreement, and final group review remain outstanding. No course submission has been made as part of preparing this portfolio.
+The three-project portfolio, Google Docs and GitHub are supporting collaboration resources. They do not replace those required components. Other members’ names/contributions where blank, completion of the group agreement, and final group review remain outstanding. No course submission has been made as part of preparing this portfolio.
 
 ## Reproducibility and version scope
 

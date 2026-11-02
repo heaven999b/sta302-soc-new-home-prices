@@ -2,6 +2,10 @@
 
 ## 2026-11-02
 
+- Synced the three-round writing review to the live Google Doc and proposal snapshots: revised literature, explicit research gap, dollar slope interpretation, and fuller diagnostic limitations.
+- Replaced the proposal's Manhattan study with Sirmans et al. (2006), updated captions and bibliography, and preserved the latest live team names/assignments.
+- Checked exact paragraph/table agreement against the live Word export; retained all four figures and all five tables. Model code, data, split and numerical output remain unchanged.
+
 - Added a complete repository-home navigation table for cloud documents, code, data, figures and outputs.
 - Synced Haiwen Yi’s first three task assignments into all English proposal formats.
 - Updated OneDrive submission link and removed stale submission-status claims.

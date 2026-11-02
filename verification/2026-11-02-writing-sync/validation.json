@@ -1,0 +1,19 @@
+{
+  "review_rounds": 3,
+  "word_counts": {
+    "intro": 342,
+    "prelim": 313,
+    "captions": 49
+  },
+  "preliminary_including_captions": 362,
+  "pdf_pages": 10,
+  "docx_tables": 5,
+  "docx_images": 4,
+  "approved_paragraphs_match_live_docx": true,
+  "approved_paragraphs_match_pdf_and_html": true,
+  "all_tables_preserved_from_live_backup": true,
+  "all_image_bytes_preserved_from_live_backup": true,
+  "final_docx_render_pages_identical_to_visually_checked_version": 10,
+  "online_pdf_pages_visually_checked": 10,
+  "quercus_submitted": false
+}

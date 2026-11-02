@@ -9,19 +9,19 @@ Group 62
 | Member name | Contribution to this proposal |
 |---|---|
 | Haiwen Yi | Research design, statistical analysis, and report writing. |
-| __________ | __________ |
+| Olivia Qi | __________ |
 | __________ | __________ |
 | __________ | __________ |
 
 ## Introduction
 
-Among detached single-family homes sold in the United States in 2025, how is sale price associated with finished floor area, and does this association differ across the nine Census divisions after adjustment for lot size, rooms, amenities, construction features and sale timing? Sale price includes the lot and is measured in thousands of dollars; floor area is measured in hundreds of square feet.
+Among new detached, non-condominium homes sold in the United States in 2025, how is sale price associated with finished floor area, and does this association differ across the nine Census divisions after adjusting for lot size, room counts, amenities, construction features and sale timing? The response is sale price including land, measured in thousands of dollars; the focal predictors are floor area, measured in hundreds of square feet, Census division, and their interaction.
 
-Comparing average prices per square foot would mix regional differences with differences in housing characteristics. Multiple linear regression separates these conditional associations. A floor-area-by-division interaction estimates nine adjusted slopes. Their confidence intervals and the joint partial F-test of eight interaction coefficients answer the question. These are observational associations, not the causal return to adding space to a particular house.
+Three studies motivate this question. Rosen (1974) developed a competitive-market theory in which differentiated goods are priced as bundles of characteristics, providing a foundation for adjusting jointly for floor area, lot size, rooms and amenities. This theoretical result does not prescribe a linear price function. Gyourko and Saiz (2006) documented substantial construction-cost differences across US housing markets, jointly associated with local wages, unionization, topography and regulation. Because construction costs comprise much of new-house prices in most markets, these findings motivate examining geographic differences while controlling for structural characteristics. In a meta-regression of single-family housing studies, Sirmans et al. (2006) found that estimated floor-area coefficients varied by geographic location and by the number of predictors included in the model. This motivates comparing division-specific slopes under a common adjustment set.
 
-Rosen (1974) developed a theoretical model in which differentiated goods trade at prices related to their characteristics. This motivates treating floor space and amenities as separate hedonic attributes; the theory does not itself establish a causal construction effect. Gyourko and Saiz (2006), studying US housing markets, found economically substantial variation in construction costs associated with wages, unionization, topography and regulation. This motivates regional differences while retaining structural controls. Glaeser et al. (2005) found that Manhattan housing prices substantially exceeded construction costs and presented evidence of supply restrictions in other US markets. Their high-rise setting differs from detached homes, so it motivates investigating regional heterogeneity rather than predicting our coefficients directly.
+These studies leave open whether a common area–price slope adequately summarizes new detached homes across the nine divisions within one dataset and adjustment set. We address this question using 2025 Survey of Construction records. Builders and housing analysts are the primary audience: the comparison can reveal whether applying one national slope obscures regional differences, subject to the limitations of an unweighted complete-case sample.
 
-Our application brings these ideas to a recent national microdata sample, comparing all nine divisions within one specification. It does not claim that regional price differences are a new discovery. Builders and housing analysts can use the estimates to describe how the conditional value of space varies across the observed markets; buyers should not interpret them as individual appraisals.
+Regional mean prices or mean prices per square foot mix differences in housing composition with differences in conditional associations. Multiple linear regression adjusts for observed attributes and expresses area associations in dollars. We will estimate nine division-specific slopes and confidence intervals and test whether the eight interaction coefficients are jointly zero. The linear form is a preliminary approximation to be evaluated diagnostically. The estimates describe cross-house associations; they do not identify the causal return to enlarging a house.
 
 ## Data description
 
@@ -61,13 +61,17 @@ For privacy, the public file suppresses detailed geography and identifying addre
 
 ## Preliminary results
 
-OLS uses 17 predictors plus the interaction (52 coefficients; n=4,330). R²=0.713 and adjusted R²=0.710; the interaction adds 0.020, F(8,4278)=37.3. Table 2 reports conditional slopes with conventional uncertainty, which is provisional under the violations below.
+Unweighted OLS includes 17 predictors and the area–division interaction (52 coefficients; n=4,330). Training R²=0.713 and adjusted R²=0.710. Adding the interaction increases R² by 0.020: two percentage points of explained training variation. Its conventional partial F-test is F(8,4278)=37.27, p<0.001.
 
-Conditions 1–2 are approximately satisfied: observed versus fitted prices are broadly linear and numerical predictor pairs lack strong curvature (Figure 2). Linearity is mildly violated by bending residual smoothers. Constant variance fails: residuals fan out and group spreads differ approximately fivefold. Normality fails: the Q–Q upper tail is heavy, with 36 standardized residuals beyond ±4 (Figures 3–4). Independence is not established because subdivision/builder identifiers are unavailable. No remedies are applied here.
+Table 2 reports division slopes and contrasts. Holding other measured predictors fixed, an additional 100 square feet is associated with a fitted mean price increase of $11,834 in South Atlantic and $24,557 in Middle Atlantic. The estimated difference between these slopes is $12,723 per 100 square feet (95% CI: $10,359–$15,087; Appendix A). These are comparisons across homes. New England’s estimate warrants caution with only 39 observations.
 
-Regional differences are compatible with Gyourko and Saiz (2006) and Glaeser et al. (2005), without demonstrating construction-cost or regulatory mechanisms. Lot size is unexpectedly inconclusive (p=0.28); the negative bedroom association conditions on fixed area. Sparse New England observations make that slope uncertain.
+For course Conditions 1–2, Figure 2 shows a broadly linear observed–fitted relationship and no pronounced curvature among numerical predictor pairs. Residual smoothers suggest mild nonlinearity: they bend around zero against fitted values and at large floor areas (Figure 3). Residual smoothers against lot size and sale month are comparatively flat. Constant variance fails: the residual fan and rising scale–location curve show increasing spread, while division residual SDs differ approximately fivefold (Figures 3–4). Normality fails: the Q–Q plot and histogram show heavy tails and right skew, with 36 standardized residuals outside ±4. Independence remains unverified because shared builders or subdivisions cannot be identified. Consequently, conventional standard errors, confidence intervals and the F-test remain provisional. No model corrections are applied here.
 
-Table 2. Preliminary estimates, standard errors and 95% confidence intervals.
+Regional slope heterogeneity agrees qualitatively with Sirmans et al. (2006). Gyourko and Saiz’s (2006) construction-cost differences provide context, but this model does not identify that mechanism. Unexpectedly, four-bedroom homes have lower fitted prices than homes with at most two bedrooms (−54.27; 95% CI: −86.95 to −21.59 in $1000s; Appendix A). This compares bedroom configurations at fixed area and other attributes, not the causal effect of adding bedrooms.
+
+Lot size is imprecise (0.21; 95% CI: −0.17 to 0.60 in $1000s per 1,000 square feet), which does not establish zero land value.
+
+Table 2. Adjusted area slopes (conventional SEs and 95% CIs) and contrasts versus South Atlantic (SEs); units: $1000 per 100 sq ft.
 
 | Division | n | Slope | SE | 95% CI | Difference from South Atlantic (SE) |
 |:----------------------|------:|------:|-----:|:---------------|:--------------------|
@@ -82,11 +86,11 @@ Table 2. Preliminary estimates, standard errors and 95% confidence intervals.
 | Pacific | 374 | 21.70 | 1.14 | (19.47, 23.92) | 9.86 (1.17) |
 
 
-![Figure 2. Observed–fitted relationship and predictor pairs.](../figures/fig2_conditions.png)
+![Figure 2. Observed–fitted relationship and numerical predictor pairs.](../figures/fig2_conditions.png)
 
-![Figure 3. Residuals, scale-location, Q–Q and numerical predictors.](../figures/fig3_residuals.png)
+![Figure 3. Residual and normality diagnostics.](../figures/fig3_residuals.png)
 
-![Figure 4. Categorical residuals and standardized-residual distribution.](../figures/fig4_resid_by_categorical.png)
+![Figure 4. Categorical residual boxplots (outlier points hidden); standardized-residual histogram includes all observations.](../figures/fig4_resid_by_categorical.png)
 
 
 
@@ -103,10 +107,10 @@ Freeze the final model before one test-set evaluation. Disclose full-sample desc
 | November 12 | Transformations and diagnostics | Haiwen Yi |
 | November 19 | Variable selection and influence checks | Haiwen Yi |
 | November 22 | Robustness and frozen-model validation | Haiwen Yi |
-| November 27 | Poster draft | __________ |
-| November 30 | Poster review | __________ |
-| December 2 | Record and review presentation | __________ |
-| December 3 | Final checks and submission | __________ |
+| November 27 | Poster draft design | Olivia Qi |
+| November 30 | Poster review | All members |
+| December 2 | Record and review presentation | All members |
+| December 3 | Final checks and submission | All members |
 
 Table 3. Proposed team schedule in Toronto time; assign members before submission.
 
@@ -115,19 +119,19 @@ Table 3. Proposed team schedule in Toronto time; assign members before submissio
 
 Fox, J., & Weisberg, S. (2019). *An R companion to applied regression* (3rd ed.). Sage.
 
-Glaeser, E. L., Gyourko, J., & Saks, R. (2005). Why is Manhattan so expensive? Regulation and the rise in housing prices. *The Journal of Law and Economics, 48*(2), 331–369. https://doi.org/10.1086/429979
-
 Gyourko, J., & Saiz, A. (2006). Construction costs and the supply of housing structure. *Journal of Regional Science, 46*(4), 661–680. https://doi.org/10.1111/j.1467-9787.2006.00472.x
 
 R Core Team. (2025). *R: A language and environment for statistical computing* (Version 4.4.3) [Computer software]. R Foundation for Statistical Computing. https://www.R-project.org/
 
 Rosen, S. (1974). Hedonic prices and implicit markets: Product differentiation in pure competition. *Journal of Political Economy, 82*(1), 34–55. https://doi.org/10.1086/260169
 
+Sirmans, G. S., MacDonald, L., Macpherson, D. A., & Zietz, E. N. (2006). The value of housing characteristics: A meta analysis. *The Journal of Real Estate Finance and Economics, 33*, 215–240. https://doi.org/10.1007/s11146-006-9983-5
+
+University of Toronto. (2026). *STA302 Embedded Ethics: Dataset ethics* [Course slides]. Quercus.
+
 U.S. Census Bureau. (n.d.). *Survey of Construction microdata files: General information and variable descriptions* [Documentation]. https://www.census.gov/construction/chars/pdf/socmicro_info.pdf
 
 U.S. Census Bureau. (2026). *Survey of Construction (SOC) microdata: 2025 annual file* [Data set]. https://www.census.gov/construction/chars/microdata.html
-
-University of Toronto. (2026). *STA302 Embedded Ethics: Dataset ethics* [Course slides]. Quercus.
 
 ## Appendix A. All coefficients of the preliminary model
 
