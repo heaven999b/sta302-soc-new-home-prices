@@ -4,6 +4,7 @@
 
 | Material | Link |
 |---|---|
+| Team tasks and deliverables | [Task checklist and responsibilities to confirm](docs/TEAM_TASK_CHECKLIST_EN.md) |
 | Part 0 teamwork agreement — collaborative Google Doc | [Open Part 0](https://docs.google.com/document/d/1jENKQ83oF1fpZYHq7wk_R3dypHRt6pBYv2vRfdR1l7Q/edit) |
 | Part 1 proposal — collaborative Google Doc | [Open Part 1](https://docs.google.com/document/d/1rDqK7jcE0h9sf8BB9BrexBxCRF1ibI0mxvHbqdOyR-w/edit) |
 | Proposal snapshot — updated 2 November 2026 | [PDF](proposal/Proposal_Part1_EN.pdf) · [Word](proposal/Proposal_Part1_EN.docx) · [Markdown](proposal/Proposal_Part1_EN.md) |
