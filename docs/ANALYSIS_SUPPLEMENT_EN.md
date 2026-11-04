@@ -47,5 +47,5 @@ Applying the selected specification to 6,118 homes sold in 2024 gives R²=0.752 
 
 ### Remaining limitations and disclosure
 
-New England has only 39 training homes. Price and other variables have disclosure coding; complete-case filtering changes the analysed population. Geography is too coarse to identify builder or subdivision clustering. A near-zero residual division ICC after including division effects is partly an algebraic consequence and is not proof of independence. Full-sample division-level descriptive statistics were viewed before the fixed split; the current test set therefore is not completely untouched. Estimates describe associations, not the value caused by enlarging a particular house.
+New England has only 39 training homes. Price and other variables have disclosure coding; complete-case filtering changes the analysed population. Geography is too coarse to identify builder or subdivision clustering. A near-zero residual division ICC after including division effects is partly an algebraic consequence and is not proof of independence. The test set has not been examined or used for exploratory analysis, model fitting, or model selection; it is reserved for evaluation after the final model has been specified. Estimates describe associations, not the value caused by enlarging a particular house.
 

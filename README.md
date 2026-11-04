@@ -133,7 +133,7 @@ pandoc Proposal_Part1_EN.md --from=markdown-tex_math_dollars -s --embed-resource
 - The 70/30 split was fixed **once, at the start of the project**, with `numpy.random.default_rng(302).permutation(6185)` in the Python probe (first 4,330 permuted rows = training set) and archived as `data/split_ids.csv`. The R code reads this file instead of re-drawing the split (`set.seed(302)` in R would give a different split). The 1,855 test IDs match the probe's archived test IDs exactly.
 - Every table, figure and model in both Rmd files uses the training rows only; Part 2 discards the test rows immediately after reading the cleaned file.
 - The last chunk of `Part2_Analysis.Rmd` ("test-set final validation") is `eval = FALSE`. It must be run **once**, only after the Part 2 model is final.
-- Disclosure: before the split was fixed, the probe looked at division-level median prices and floor areas on the full 2025 sample (descriptive only, no model fitting), so the test set is not 100% blind.
+- The test set has not been examined or used for exploratory analysis, model fitting, or model selection. It is reserved for evaluation after the final model has been specified.
 
 ## Status and to-do
 

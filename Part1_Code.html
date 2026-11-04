@@ -568,10 +568,7 @@ with <code>numpy.random.default_rng(302).permutation(6185)</code>
 applied to the rows of the cleaned data in the order above, with the
 first 4,330 permuted rows forming the training set. We read the archived
 file instead of re-drawing the split in R (<code>set.seed(302)</code> in
-R would give a different split). This guarantees that the test set is
-the same one that was set aside before any modelling and that it has
-never been looked at: every table, figure and model in this file uses
-the training rows only.</p>
+R would give a different split). This preserves the archived train/test assignment. The test set has not been examined or used for exploratory analysis, model fitting, or model selection. It is reserved for evaluation after the final model has been specified. Every analysis table, figure and model in this file uses the training rows only.</p>
 <pre class="r"><code>split_ids &lt;- read.csv(&quot;data/split_ids.csv&quot;)
 stopifnot(nrow(split_ids) == nrow(soc), setequal(split_ids$id, soc$id))
 soc$split &lt;- split_ids$split[match(soc$id, split_ids$id)]

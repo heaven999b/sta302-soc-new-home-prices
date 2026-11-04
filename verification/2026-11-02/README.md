@@ -18,3 +18,7 @@ Dependencies and data provenance are documented in the repository README. `sha25
 ## Selected proposal preparation
 
 The current Google Docs exports include Haiwen Yi’s confirmed contribution; other member contributions and all seven task owners remain blank. Both PDF and rendered Word were checked across all 10 pages. `Part1_Code.Rmd` now identifies Group 62 and was rendered again successfully; see `part1-group62-render.log`. The cleaned 2025 CSV remains byte-identical. The checksum file now identifies these updated delivery copies. The agreement is unsigned and OneDrive upload/access remain pending.
+
+## Process-description correction — 5 November 2026
+
+The project owner confirmed that the test set was not examined. The earlier prose above describing full-sample inspection and a non-blind test set is superseded by that correction. Current README, Part 1 code narrative, and analysis supplement use the corrected account. This clarification does not constitute a new execution audit; historical logs and data remain unchanged.

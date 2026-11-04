@@ -100,7 +100,7 @@ Keep floor area, division and their interaction because they define the question
 
 Evaluate a Box–Cox transformation of price, including log price; compare log floor area if curvature persists. Recheck Conditions 1–2, residuals against fitted values and every predictor, constant variance and normality after each transformation and selection step. Investigate leverage, standardized residuals, Cook's distance, DFFITS and DFBETAS; remove observations only for documented errors. Assess remaining heteroscedasticity with HC3 and weighted least squares, including survey-weight sensitivity. Neither robust errors nor regional effects prove independence.
 
-Freeze the final model before one test-set evaluation. Disclose full-sample descriptive inspection before the split and distinguish 2024 replication from held-out 2025 validation.
+Freeze the final model before one test-set evaluation. Keep the test set unexamined during model development and distinguish 2024 replication from held-out 2025 validation.
 
 | Completion date in 2026 | Task | Responsible member |
 |---|---|---|

@@ -31,3 +31,7 @@
   - proposal 移入 `proposal/`，图片路径改为 `../figures/...`，样式抽出为 `proposal/proposal.css`，HTML 重新生成。
   - 新增 `README.md`、`README_zh.md`、`design/research_design.md`（中文研究设计，数字为 R 核对后的版本）、`docs/`、`probe/README.md`。
   - 在新位置重新 knit `Part1_Code.Rmd`，`data/cleaned/soc_clean.csv` 与原文件逐字节一致。
+
+## 2026-11-05 — Correct test-set process description
+
+Following the project owner's explicit confirmation that the test set was not examined, corrected the earlier full-sample-exploration statement in README and supporting prose. Clarified that the test set has not been used for exploration, model fitting, or model selection and is reserved for final evaluation. Synchronized Part 1 Rmd/HTML narrative; all executable R chunks, data and archived split are unchanged. No new model run is claimed.

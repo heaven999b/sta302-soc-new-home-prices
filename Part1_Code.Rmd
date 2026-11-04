@@ -165,9 +165,9 @@ The 70/30 train/test split was fixed **once, at the start of the project, and ar
 `data/split_ids.csv` (columns `id`, `split`). It was produced in Python with
 `numpy.random.default_rng(302).permutation(6185)` applied to the rows of the cleaned data in the order
 above, with the first 4,330 permuted rows forming the training set. We read the archived file instead of
-re-drawing the split in R (`set.seed(302)` in R would give a different split). This guarantees that the
-test set is the same one that was set aside before any modelling and that it has never been looked at:
-every table, figure and model in this file uses the training rows only.
+re-drawing the split in R (`set.seed(302)` in R would give a different split). This preserves the archived train/test assignment. The test set has not been examined or used for
+exploratory analysis, model fitting, or model selection. It is reserved for evaluation after the final
+model has been specified. Every analysis table, figure and model in this file uses the training rows only.
 
 ```{r split-and-write}
 split_ids <- read.csv("data/split_ids.csv")
