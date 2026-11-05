@@ -156,3 +156,7 @@ pandoc Proposal_Part1_EN.md --from=markdown-tex_math_dollars -s --embed-resource
 - U.S. Census Bureau. (n.d.). *Survey of Construction microdata files: General information and variable descriptions*. https://www.census.gov/construction/chars/pdf/socmicro_info.pdf
 
 The SOC microdata are public-domain U.S. government data.
+
+## Current submission files
+
+Use [submission/current](submission/current/) for the latest PDFs exported from Google Docs on 5 November 2026, together with the corrected root `Part1_Code.Rmd`. Read its status note before submission; the older `proposal/` snapshot is not the current Google Docs revision.
