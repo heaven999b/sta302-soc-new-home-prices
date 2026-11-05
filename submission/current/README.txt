@@ -1,7 +1,11 @@
-Current submission materials — 5 November 2026
+Current revision materials — 5 November 2026
 
-Use the PDFs in this folder together with the repository-root Part1_Code.Rmd and data/ folder. The proposal PDF is exported from the current Part 1 Revised — Red Changes Google Docs tab, not the older proposal snapshot. The Rmd and README contain the project owner-confirmed correction that the test set has not been examined or used for exploratory analysis, model fitting, or model selection.
+The proposal PDF is the nine-page export of the existing Part 1 Revised — Red Changes Google Docs tab after the approved joint review and layout corrections. The original tab and all Table 3 assignments are preserved, including Annie Xu on Dec 1. Table 3 still contains TBD roles for the team to fill.
 
-This is the current preparation set, not a submission receipt. Before submitting: complete Annie Xu’s contribution and Table 3 TBD assignments, re-export the proposal after those edits, and reconcile/run the Rmd figure output against the current proposal (the existing categorical diagnostic output remains combined, while the proposal splits it into Figures 4 and 5). This text-only correction did not rerun the analysis.
+The current repository-root Part1_Code.Rmd includes the approved N1 diagnostic narrative. All 20 R code chunks are unchanged. Part1_Code.html has the same narrative update using its existing reported values; code, numerical output and images are unchanged. This was a narrative-only update, not a new knit or model run. The test set has not been examined or used for exploratory analysis, model fitting or model selection.
 
-Submit the two PDFs and Part1_Code.Rmd to Quercus. Put the UofT OneDrive data link in the submission comment. Do not upload this README or manifest as a required course component.
+The proposal and Rmd retain the same statistical results, with different panel grouping: the proposal has separate Figures 4 and 5, while the existing Rmd combines those categorical diagnostics in Figure 4. No figures were removed or regenerated.
+
+Quercus first submission already completed on Nov 4, 2026 at 7:17 p.m. Toronto time (Nov 5, 08:17 Beijing): Group62_Part0_Teamwork_Agreement.pdf, Group62_Part1_Proposal.pdf and Part1_Code.Rmd, with the OneDrive data link in the comment. Receipt: https://q.utoronto.ca/courses/462653/assignments/1779637/submissions/829340
+
+This revision has NOT been resubmitted. The files in first_submission remain the original submitted evidence. Any resubmission requires the user's instruction.

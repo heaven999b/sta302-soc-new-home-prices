@@ -1713,41 +1713,14 @@ round(tapply(e1, train$sale_month, mean), 1)</code></pre>
 <h2><span class="header-section-number">9.5</span> Conclusions for each
 assumption (no corrections made in Part 1)</h2>
 <ul>
-<li><strong>Condition 1 (Y vs fitted): approximately holds.</strong> The
-observed prices scatter around a single increasing curve close to the
-identity line (correlation 0.84), but the spread widens sharply at high
-fitted values. Because both conditions hold reasonably, the residual
-plots can be used to diagnose which assumption fails.</li>
-<li><strong>Condition 2 (numerical predictors vs each other):
-holds.</strong> The pairwise plots show no curved patterns; the largest
-absolute correlation among <code>sqft100</code>, <code>lot_k</code> and
-<code>sale_month</code> is 0.22.</li>
-<li><strong>Linearity: mildly violated.</strong> The LOWESS curve of
-residuals vs fitted values is slightly U-shaped, and residuals vs
-<code>sqft100</code> bend away from zero at the largest floor areas.
-<code>lot_k</code> and <code>sale_month</code> show no systematic
-pattern.</li>
-<li><strong>Constant variance: clearly violated.</strong> Residuals vs
-fitted values fan out (funnel shape) and the scale-location curve rises
-steadily. The Breusch-Pagan (Koenker) statistic is 1281 on 51 df;
-residual SDs differ across divisions by a factor of 5.0 (Levene p =
-1.8e-96), and also across stories, bathrooms and other levels.</li>
-<li><strong>Normality: clearly violated.</strong> The QQ plot has a
-long, steep upper tail; residual skewness is 2.04 and excess kurtosis
-18.0, with 36 standardized residuals beyond +/-4. Part of the tail is
-caused by the Census top-coding of prices.</li>
-<li><strong>Uncorrelated errors: plausible by design, cannot be fully
-tested.</strong> SOC is a probability sample of building permits, each
-row is a different house, and all rows are one cross-section (2025
-contracts); the order of houses in the file is randomly scrambled within
-division, so a residual-vs-order plot carries no information. Residuals
-show no trend across sale months. The public file has no subdivision or
-builder identifier, so correlation among houses from the same
-development cannot be checked; we note this as a limitation.</li>
+<li><strong>Condition 1 (conditional mean response): uncertain.</strong> The observed-versus-fitted smoother has modest central deviations from the identity line and sparse upper-range departures. Disclosure coding can alter relationships at extreme values. These plots do not establish the condition, so residual patterns cannot isolate particular assumption violations.</li>
+<li><strong>Condition 2 (conditional mean predictor): no clear violation in the plotted numerical pairs.</strong> The lot-area smoother bends mildly, while the month relationships are flatter. This is a limited visual assessment, not proof that all conditional predictor means are linear. Pairwise correlation magnitudes cannot establish this condition.</li>
+<li><strong>Linearity/mean-zero errors: possible concern.</strong> The residual-versus-fitted smoother is slightly U-shaped, and residuals versus floor area bend at high values. Lot and month smoothers remain near zero. These patterns suggest a mean-structure problem, subject to the uncertainty about Conditions 1 and 2.</li>
+<li><strong>Constant variance: substantial diagnostic concern.</strong> Residuals fan out and the scale-location curve rises. The Breusch-Pagan (Koenker) statistic is 1281 on 51 df; division residual SDs differ by a factor of 5.0 (Levene p = 1.8e-96). These residual summaries support the concern but do not separate variance misspecification from an incorrect conditional mean.</li>
+<li><strong>Normality: questionable.</strong> The Q-Q plot has heavy tails, especially on the right; residual skewness is 2.04 and excess kurtosis is 18.0, with 36 standardized residuals beyond +/-4. Disclosure coding may affect the plots, but these diagnostics do not identify it as the cause of the observed tail. Inference is provisional.</li>
+<li><strong>Uncorrelated errors: unverified.</strong> Probability sampling and distinct houses do not guarantee uncorrelated errors: shared builders or developments could induce dependence. The file&#x27;s within-division record order is randomized, so residual-versus-order plots cannot diagnose collection order. Near-zero monthly mean residuals do not establish independence. Builder and subdivision identifiers are unavailable for a direct check.</li>
 </ul>
-<p>These violations (right skew, heavy tail, and variance increasing
-with the mean) will be addressed in Part 2, for example with a
-Box-Cox/log transformation of price; nothing is corrected here.</p>
+<p>These diagnostic signals motivate reassessing the mean structure and considering a Box-Cox/log price transformation in Part 2. No correction is applied in Part 1.</p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>#&gt; R version 4.4.3 (2025-02-28)
 #&gt; Platform: aarch64-apple-darwin20.0.0
