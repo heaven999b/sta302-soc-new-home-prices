@@ -2,7 +2,7 @@
 
 ## Current revision — 5 November 2026
 
-Use [the revised proposal PDF](submission/current/Proposal_Part1_EN.pdf), [Part1_Code.Rmd](Part1_Code.Rmd) and [the current status note](submission/current/README.txt). The approved diagnostic narrative is synchronized in the Rmd and existing HTML; no analysis was rerun. Table 3 assignments are preserved and its TBD roles await the team.
+Use [the revised proposal PDF](submission/current/Proposal_Part1_EN.pdf), [Part1_Code.Rmd](Part1_Code.Rmd) and [the current status note](submission/current/README.txt). The final PPT-aligned diagnostic narrative is synchronized in the red Google Doc, PDF, Rmd and existing HTML (Results: 399 words); no analysis was rerun. Table 3 assignments are preserved and its TBD roles await the team.
 
 The first Quercus submission was completed Nov 4 at 7:17 p.m. Toronto time. **This new revision has not been resubmitted.** [Submission receipt](https://q.utoronto.ca/courses/462653/assignments/1779637/submissions/829340). The dated November 2 snapshot and historical status text below do not describe the current submission state.
 

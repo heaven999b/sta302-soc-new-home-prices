@@ -487,37 +487,38 @@ round(tapply(e1, train$sale_month, mean), 1)
 
 ## Conclusions for each assumption (no corrections made in Part 1)
 
-* **Condition 1 (conditional mean response): uncertain.** The observed-versus-fitted smoother
-  has modest central deviations from the identity line and sparse upper-range departures.
-  Disclosure coding can alter relationships at extreme values. These plots do not establish
-  the condition, so residual patterns cannot isolate particular assumption violations.
-* **Condition 2 (conditional mean predictor): no clear violation in the plotted numerical pairs.**
-  The lot-area smoother bends mildly, while the month relationships are flatter. This is a
-  limited visual assessment, not proof that all conditional predictor means are linear.
-  Pairwise correlation magnitudes cannot establish this condition.
-* **Linearity/mean-zero errors: possible concern.** The residual-versus-fitted smoother is
-  slightly U-shaped, and residuals versus floor area bend at high values. Lot and month
-  smoothers remain near zero. These patterns suggest a mean-structure problem, subject to
-  the uncertainty about Conditions 1 and 2.
-* **Constant variance: substantial diagnostic concern.** Residuals fan out and the
-  scale-location curve rises. The Breusch-Pagan (Koenker) statistic is
+* **Condition 1 (conditional mean response): seems to hold.** The observed-versus-fitted
+  smoother shows a simple increasing curve, despite sparse upper-range departures from
+  the identity line. The general condition permits a simple curving relationship; it does
+  not require the special case g(z) = z. This is a visual assessment, not proof.
+* **Condition 2 (conditional mean predictor): seems to hold for the plotted numerical pairs.**
+  The lot-area smoother bends mildly, while the month relationships are nearly flat.
+  No substantial nonlinearity is apparent in these pairs; this conclusion does not extend
+  to all predictors. Pairwise correlation magnitudes cannot establish this condition.
+* **Linearity (mean-zero errors): appears mildly violated.** The residual-versus-fitted
+  smoother curves, and residuals versus floor area bend at high values. Lot and month
+  smoothers remain near zero. These patterns suggest a problem with the current linear
+  mean structure, even though the general conditional mean response condition seems to hold.
+* **Constant error variance: appears violated.** Residuals fan out and the scale-location
+  curve rises. The Breusch-Pagan (Koenker) statistic is
   `r sprintf("%.0f", checks["BP_LM"])` on `r checks["BP_df"]` df; division residual SDs differ by
   a factor of `r sprintf("%.1f", checks["max_sd_ratio_division"])` (Levene p =
-  `r format(checks["levene_division_p"], digits = 2)`). These residual summaries support the
-  concern but do not separate variance misspecification from an incorrect conditional mean.
-* **Normality: questionable.** The Q-Q plot has heavy tails, especially on the right;
+  `r format(checks["levene_division_p"], digits = 2)`). These residual summaries support
+  the graphical concern, although mean misspecification can also affect residual spread.
+* **Normality: appears violated.** The Q-Q plot has heavy tails, especially on the right;
   residual skewness is `r sprintf("%.2f", checks["resid_skewness"])` and excess kurtosis is
   `r sprintf("%.1f", checks["resid_excess_kurtosis"])`, with `r checks["n_abs_std_resid_gt_4"]`
   standardized residuals beyond +/-4. Disclosure coding may affect the plots, but these
-  diagnostics do not identify it as the cause of the observed tail. Inference is provisional.
+  diagnostics do not identify it as the cause of the observed tail.
 * **Uncorrelated errors: unverified.** Probability sampling and distinct houses do not
   guarantee uncorrelated errors: shared builders or developments could induce dependence.
   The file's within-division record order is randomized, so residual-versus-order plots
-  cannot diagnose collection order. Near-zero monthly mean residuals do not establish
+  cannot diagnose collection order. The near-zero residual-versus-month smoother does not establish
   independence. Builder and subdivision identifiers are unavailable for a direct check.
 
-These diagnostic signals motivate reassessing the mean structure and considering a
-Box-Cox/log price transformation in Part 2. No correction is applied in Part 1.
+One assumption violation may affect another assumption's diagnostic plot. Inference remains
+provisional. These diagnostic signals motivate reassessing the mean structure and considering
+a Box-Cox/log price transformation in Part 2. No correction is applied in Part 1.
 
 ```{r session}
 sessionInfo()
