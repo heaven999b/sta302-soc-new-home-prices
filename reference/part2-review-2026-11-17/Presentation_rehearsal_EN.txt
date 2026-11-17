@@ -1,0 +1,60 @@
+STA302 PART 2 — REVISED REHEARSAL OUTLINE (REVISION 2)
+Target: 7:20; four equal 1:50 blocks; 40 seconds of margin. The group assigns speakers.
+This is preparation, not a script to read during recording. Practise, then put notes away.
+No actual timing or speaking performance has been verified.
+
+BLOCK 1 | 0:00–1:50 | QUESTION, MOTIVATION, LITERATURE AND DATA
+Point to sections 1–2. Explain why one national size adjustment could hide regional housing patterns.
+Question: among new detached, non-condominium U.S. homes sold in 2025, does the adjusted size-price association vary across nine Census divisions?
+Why regression: houses differ in land, rooms and amenities. Simple regional averages mix these features; regression compares while holding recorded features fixed. This is a descriptive comparison, not an appraisal or renovation-return estimate.
+Literature, briefly: Sirmans et al. report geographic/specification variation in size coefficients. Gyourko–Saiz study construction costs; our prices include land and cannot isolate that mechanism. Zietz–Sirmans–Smersh study variation across price quantiles, a different target from our transformed-mean model.
+Data: Census SOC 2025; sampled permits, area canvassing and builder/owner interviews. Official documentation supports traceability, but privacy coding modifies some measurements.
+Point to the flow: 7,382 eligible, 6,185 complete, 4,330 training; 1,855 reserved. Missing-field exclusions remove 16.2% of eligible cases, limiting generalization.
+Tools: regional slopes, ordinary intervals and one joint partial F comparison; explain that data-based model selection limits confirmatory inference.
+Transition: the raw-price regression needed a better response scale.
+
+BLOCK 2 | 1:50–3:40 | DIAGNOSTICS, TRANSFORMATION AND SELECTION
+Point to Figure 2, then Table 1. Explain the evidence chain rather than reciting software commands.
+1. First inspect response-versus-fitted and predictor relationships; then residual means, spread, tails and plausible dependence. Predictor pairs are an imperfect screen, and builder dependence cannot be checked without IDs.
+2. Raw-price residuals fan out and have heavy tails. Log price improves them but still leaves rising spread. With the SAME log-area design, Box–Cox estimates power −0.504 with interval [−0.554, −0.455]. We choose the simpler −0.5 inverse-square-root response. This is supported by the course transformation method, not chosen for the smallest p-value.
+3. The end-fifth residual-spread ratio improves from 4.46 (raw) / 1.71 (previous log) to 1.05 (final). Figure 2 still shows tail departures: improved does not mean all assumptions proved.
+4. Backward BIC balances fit and model size. Automated selection gives a repeatable record instead of discretionary repeated manual tests. We still make substantive choices: keep area, region, their interaction and lot size, respect hierarchy, and disclose selection bias. Automation is not automatically ethical or unbiased.
+5. Table 1: 52 to 46 coefficients; same-scale BIC improves by 23.37 with a small R² loss. AIC is a sensitivity check. Removing sale stage gives a nominal F p≈0.000372 yet BIC falls 0.774: the penalty rule differs from 5% testing. Do not call stage “insignificant.” AIC retains it; illustrated effects differ by at most 0.18 percentage points.
+6. Recheck each deletion and the final model; inspect complete VIFs and influence. Centering preserves fits but does not remove all collinearity. No valid observation is deleted just to improve the results.
+Transition: show what the transformed response means before interpreting the chart.
+
+BLOCK 3 | 3:40–5:30 | INTERPRETING RESULTS CORRECTLY
+Point to Figure 1 and the model equation. We model z=2−2/sqrt(P), with P in thousands of dollars. It increases with price; positive slopes still mean larger homes have higher fitted transformed prices, holding other recorded characteristics fixed.
+For an accessible illustration, start at a hypothetical $500,000 model price index, increase area by 10%, and transform back. The chart gives about 4.3%–8.6%, depending on division: South Atlantic about 7.1%, West South Central about 8.6%.
+Say explicitly: this index is the inverse of the fitted transformed mean. It is NOT average sale price, a constant elasticity, or renovation profit. Effects change with the starting price. The $500,000 reference is stipulated, not an estimated average or a claim that identical houses everywhere start at that price.
+The ordinary 95% intervals show uncertainty within the selected specification; selection uncertainty is omitted. Overlap is not a direct pairwise test, and the chart is not a confirmed ranking.
+The equal-slope comparison on the transformed scale gives F(8,4284)=16.68 and nominal p≈1.40×10^-24. Module 9 says ordinary p-values after automated selection are not valid confirmatory evidence. Do not announce a population finding from the tiny p-value. The interaction adds about 0.00775 to same-scale training R².
+The estimated regional variation is qualitatively consistent with Sirmans; it does not test the cost mechanisms or quantile findings of the other studies.
+Transition: explain how sensitive the picture is and where it can be used.
+
+BLOCK 4 | 5:30–7:20 | SENSITIVITY, LIMITATIONS AND MESSAGE
+Point to section 6. Removing each of the ten largest Cook-distance cases changes an illustrated effect by at most 0.19 percentage points. We retain the observations; thresholds trigger investigation, not automatic deletion.
+Excluding coded prices, areas and lots changes an illustrated effect by up to 2.0 percentage points, and changes the analysed population. That is material relative to the regional differences. The earlier log-response model also changes the regional ordering because it targets a different transformed mean.
+New England has only 39 training cases. Missing data, privacy coding, unobserved fine location/builder clusters and unweighted analysis limit generalization. Tail departures remain. Some controls have high VIF; centering does not make correlated features independent.
+We need finer location/builder IDs, survey-design information and a new sample to assess a fixed specification. The existing test set remains reserved; no test score was computed in this review.
+Closing message in your own words: larger homes have higher fitted prices in this sample, and the adjusted relationship varies regionally. The improved model describes that pattern, but cannot establish causal renovation returns or a precise population ranking.
+
+REHEARSAL QUESTIONS — EVERY MEMBER SHOULD BE ABLE TO ANSWER
+• Why regression rather than regional averages?
+• What do privacy flags and the 16.2% exclusion mean?
+• Why did the final response change from log to inverse square root?
+• Why can you compare the two BIC values in Table 1, but not BIC across different responses?
+• Why can BIC drop a term with a small nominal F p-value?
+• What was forced to stay, and why? Does automation remove researcher discretion?
+• What does the $500,000 illustration estimate, and what does it NOT estimate?
+• Why can the ordinary intervals/p-value not establish a confirmed regional ranking?
+• Why keep observations with high Cook distances? Which sensitivity changes the story most?
+• What does a high VIF mean, and why does centering not solve every dependence?
+
+VIDEO ACCEPTANCE CHECKS — STILL NOT EXECUTED
+1. Run one full, natural-speed rehearsal and record its actual duration; aim below 7:40, never exceed 8:00 or speed up the video.
+2. Check all four members are visible and participate equally. For a physical-poster recording, all stay in view throughout; on Zoom/Teams, all cameras stay on throughout.
+3. Each person explains their section without script/notes and can answer a question from another section.
+4. Give an undergraduate listener the presentation: ask them to restate the question, main result and limitation. Clarify terminology they cannot explain.
+5. Keep the poster visible and point to the right figure/table; clear audio matters more than reading every printed number.
+6. OneDrive video and CSV links must work for anyone in UofT with the link. Actual permissions, video quality and platform submission remain unchecked.

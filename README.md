@@ -1,5 +1,7 @@
 # Floor area × Census division: sale prices of new U.S. homes (SOC 2025)
 
+> **Part 2 reference only (17 November 2026):** [Revised poster, reproducible analysis, rubric audit and rehearsal outline](reference/part2-review-2026-11-17/). This alternative review is for group comparison; it does not replace or approve the existing project.
+
 ## Current revision — 5 November 2026
 
 Use [the revised proposal PDF](submission/current/Proposal_Part1_EN.pdf), [Part1_Code.Rmd](Part1_Code.Rmd) and [the current status note](submission/current/README.txt). The final PPT-aligned diagnostic narrative is synchronized in the red Google Doc, PDF, Rmd and existing HTML (Results: 399 words); no analysis was rerun. Table 3 assignments are preserved and its TBD roles await the team.

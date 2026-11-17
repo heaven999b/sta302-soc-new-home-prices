@@ -1,0 +1,18 @@
+{
+  "n": 4330,
+  "rank": 46,
+  "coef_max_diff": 3.9246383920499284e-14,
+  "se_max_diff": 1.2936179905054246e-13,
+  "F_numpy": 16.677219733458184,
+  "F_R": 16.67721973346,
+  "F_abs_diff": 1.815436689867056e-12,
+  "test_evaluated": false,
+  "all_index_percentages_algebraically_verified": true,
+  "training_id_set_matches_fixed_split": true,
+  "original_files_unchanged_sha256": {
+    "Part2_Analysis.Rmd": "e81ce373f0a631744dadb197aa3812c6161743d7f525819c3827248e2e275f47",
+    "data/original/soc25.csv": "246914440675b53d53770e101211eeb4a4bc7cc31efbf0e0401ad41a42930931",
+    "data/split_ids.csv": "f7bcc71cc4fa45a2c26cd5259df50bb61d7da0a3e48bc903d407e2b3014cdd88"
+  },
+  "source_matches_fresh_execution": true
+}

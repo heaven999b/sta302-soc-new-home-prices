@@ -1,0 +1,833 @@
+---
+title: "Floor Area and Regional Differences in New Home Prices"
+subtitle: "STA302 Part 2: reproducible analysis and diagnostic appendix"
+author: "Project Group 62"
+date: "16 November 2026 - rubric revision 2"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    code_folding: hide
+params:
+  evaluate_test: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=TRUE, fig.align="center", dpi=130)
+options(width=110)
+library(MASS)
+dir.create("figures",showWarnings=FALSE)
+dir.create("results",showWarnings=FALSE)
+dir.create("data/cleaned",recursive=TRUE,showWarnings=FALSE)
+```
+
+# Research question and scope
+
+Among new detached, non-condominium homes sold in the United States in 2025,
+how is sale price associated with finished floor area, and how does this association vary
+across the nine Census divisions after adjustment for housing characteristics?
+A single national adjustment for house size may obscure differences between regional markets.
+Buyers comparing new houses and analysts describing regional markets need to distinguish a size
+association from differences in the mix of rooms, amenities and land. Regression makes those
+adjustments simultaneously; a comparison of regional means or a simple area-price correlation cannot.
+This study describes associations, not appraisal accuracy or the causal return to enlarging a house.
+
+Sirmans et al. (2006) found geographic and specification-related variation in estimated floor-area
+coefficients across housing studies. Gyourko and Saiz (2006) documented regional construction-cost
+differences; those mechanisms cannot be identified with this model. Zietz et al. (2008) found that
+housing-characteristic associations vary across price quantiles. Our conditional-mean analysis of transformed price
+addresses a different estimand. Regression provides adjusted comparisons; simple regional averages
+would also reflect different housing mixes.
+
+The focal inferential tools are division-specific coefficients, confidence intervals and the
+partial F-test of all eight area-by-division interaction coefficients. Model selection and
+remaining assumption violations make inference exploratory. Conventional intervals and partial F-tests
+rely on assumptions that remain imperfect here; their nominal coverage and p-values are not guaranteed.
+The separate internal audit is not part of this course analysis.
+
+# Data, provenance and cleaning
+
+The Census Bureau's 2025 Survey of Construction (SOC) microdata are an official national survey
+of sampled permits and canvassed areas without permits. Builders or owners are interviewed during
+construction. HUD supports collection of housing characteristics. The documented collection process,
+public codebook and disclosure flags support provenance; they do not remove reporting or sampling error.
+Price includes land. Public files omit addresses and builder identifiers, and modify extreme prices,
+floor areas and lot sizes. The Census Bureau warns that disclosure modifications alter relationships.
+We use the data for aggregate research, preserve attribution and do not attempt re-identification.
+
+This file runs directly from the original CSV and the archived split; no preliminary knit is required.
+All estimation and model decisions below use training rows. Cleaning counts describe sample eligibility.
+The archived test set is accessed for evaluation only if `evaluate_test` is enabled after the model is frozen.
+Existing records assert no prior test modelling; this review confirms the archived evaluation chunk was
+disabled, but cannot establish the complete history of every earlier inspection.
+
+```{r read-and-clean}
+raw <- read.csv("data/original/soc25.csv")
+clean_soc <- function(raw, year) {
+  steps <- data.frame(step = character(0), rows_remaining = integer(0))
+  add <- function(label, d) {
+    steps[nrow(steps) + 1, ] <<- list(label, nrow(d))
+    d
+  }
+  s <- add(sprintf("All %d SOC records", year), raw)
+  s <- add("CAT = 1 (house built for sale)", s[s$CAT == 1, ])
+  s <- add(sprintf("Sales contract signed in %d", year),
+           s[s$SALE >= year * 100 + 1 & s$SALE <= year * 100 + 12, ])
+  s <- add("Detached (DET = 1) and not in a condominium project (CON = 2)",
+           s[s$DET == 1 & s$CON == 2, ])
+  s <- add("Sale price reported (SLPR > 0)", s[s$SLPR > 0, ])
+  s <- add("Floor area and lot size reported (SQFS > 0, AREA > 0)",
+           s[s$SQFS > 0 & s$AREA > 0, ])
+  # valid (reported) codes of the 12 categorical source fields
+  valid <- list(STOR = 1:3, BEDR = 2:5, FULB = 1:4, HAFB = 0:2, GAR = 1:4, BASE = 1:4,
+                FPLS = 0:2, ASSOC = 1:2, AGER = 1:2, WAL1 = c(1, 2, 4:9), FUEL = 1:5,
+                SEWER = 1:3)
+  ok <- rep(TRUE, nrow(s))
+  for (v in names(valid)) ok <- ok & s[[v]] %in% valid[[v]]
+  s <- add("No 'not reported' code in any categorical predictor", s[ok, ])
+  list(data = s, steps = steps)
+}
+
+cl <- clean_soc(raw, 2025)
+cl$steps
+stopifnot(nrow(cl$data) == 6185)
+```
+
+```{r construct}
+recode <- function(x, map) unname(map[as.character(x)])
+ym <- function(x) (x %/% 100) * 12 + x %% 100            # YYYYMM -> month count
+
+division_levels <- c("SouthAtlantic", "NewEngland", "MidAtlantic", "ENCentral", "WNCentral",
+                     "ESCentral", "WSCentral", "Mountain", "Pacific")
+factor_levels <- list(
+  division = division_levels,
+  stories = c("1", "2", "3plus"),
+  bedrooms = c("2orless", "3", "4", "5plus"),
+  fullbath = c("1orless", "2", "3", "4plus"),
+  halfbath = c("0", "1", "2plus"),
+  garage = c("1car", "2car", "3plus", "other"),
+  foundation = c("basement", "crawl", "slab", "other"),
+  fireplace = c("0", "1", "2plus"),
+  hoa = c("no", "yes"),
+  age_restricted = c("no", "yes"),
+  wall = c("brick", "wood", "stucco", "vinyl", "stone", "fibercement", "other"),
+  heat_fuel = c("electric", "gas", "propane", "other"),
+  sewer = c("public", "septic"),
+  stage = c("completed", "under_constr", "not_started"))
+
+construct_soc <- function(s) {
+  sale_m <- ym(s$SALE)
+  strt_m <- ifelse(s$STRT > 0, ym(s$STRT), 1e9)
+  comp_m <- ifelse(s$COMP > 0, ym(s$COMP), 1e9)
+  data.frame(
+    id = s$ID,
+    price_k = s$SLPR / 1000,
+    sqft100 = s$SQFS / 100,
+    lot_k = s$AREA / 1000,
+    division = recode(s$DIV, c("1" = "NewEngland", "2" = "MidAtlantic", "3" = "ENCentral",
+                               "4" = "WNCentral", "5" = "SouthAtlantic", "6" = "ESCentral",
+                               "7" = "WSCentral", "8" = "Mountain", "9" = "Pacific")),
+    stories = recode(s$STOR, c("1" = "1", "2" = "2", "3" = "3plus")),
+    bedrooms = recode(s$BEDR, c("2" = "2orless", "3" = "3", "4" = "4", "5" = "5plus")),
+    fullbath = recode(s$FULB, c("1" = "1orless", "2" = "2", "3" = "3", "4" = "4plus")),
+    halfbath = recode(s$HAFB, c("0" = "0", "1" = "1", "2" = "2plus")),
+    garage = recode(s$GAR, c("1" = "1car", "2" = "2car", "3" = "3plus", "4" = "other")),
+    foundation = recode(s$BASE, c("1" = "basement", "2" = "crawl", "3" = "slab", "4" = "other")),
+    fireplace = recode(s$FPLS, c("0" = "0", "1" = "1", "2" = "2plus")),
+    hoa = recode(s$ASSOC, c("1" = "yes", "2" = "no")),
+    age_restricted = recode(s$AGER, c("1" = "yes", "2" = "no")),
+    wall = recode(s$WAL1, c("1" = "wood", "2" = "brick", "4" = "stucco", "5" = "vinyl",
+                            "6" = "other", "7" = "stone", "8" = "fibercement", "9" = "other")),
+    heat_fuel = recode(s$FUEL, c("1" = "electric", "2" = "gas", "3" = "propane",
+                                 "4" = "other", "5" = "other")),
+    sewer = recode(s$SEWER, c("1" = "public", "2" = "septic", "3" = "septic")),
+    sale_month = s$SALE %% 100,
+    stage = ifelse(sale_m < strt_m, "not_started",
+                   ifelse(sale_m < comp_m, "under_constr", "completed")),
+    slpr_flag = s$SLPR_F,
+    sqft_flag = s$SQFS_F, lot_flag = s$AREA_F,
+    weight = s$WEIGHT,
+    stringsAsFactors = FALSE)
+}
+
+as_model_factors <- function(d) {
+  for (v in names(factor_levels)) d[[v]] <- factor(d[[v]], levels = factor_levels[[v]])
+  d
+}
+
+soc <- construct_soc(cl$data)
+stopifnot(!anyNA(soc), !anyDuplicated(soc$id))
+dim(soc)
+```
+
+```{r fixed-split}
+split_ids <- read.csv("data/split_ids.csv")
+stopifnot(!anyDuplicated(split_ids$id), !anyDuplicated(soc$id),
+          setequal(split_ids$id,soc$id), all(split_ids$split %in% c("train","test")))
+soc$split <- split_ids$split[match(soc$id,split_ids$id)]
+stopifnot(sum(soc$split=="train")==4330, sum(soc$split=="test")==1855)
+write.csv(soc,"data/cleaned/soc_clean_review.csv",row.names=FALSE)
+train <- as_model_factors(soc[soc$split=="train",])
+rm(soc)
+train$log_price <- log(train$price_k)
+train$log_sqft <- log(train$sqft100*100)
+train$log_sqft_c <- train$log_sqft-mean(train$log_sqft)
+n <- nrow(train)
+write.csv(cl$steps,"results/cleaning_flow.csv",row.names=FALSE)
+knitr::kable(cl$steps,caption="Table 1. Sequential eligibility and complete-case counts.")
+```
+
+The complete-case loss is `r sprintf("%.1f",100*(7382-nrow(cl$data))/7382)`% of the 7,382 eligible
+homes. The split is fixed at 4,330 training and 1,855 test homes. Complete-case analysis may select
+better-reported homes; results are unweighted sample associations, not design-based national estimates.
+The 17 initial predictor concepts comprise three numerical variables (area, lot size, sale month)
+and 14 categorical variables. Factor coding and the original category pooling are retained above.
+
+```{r training-summaries}
+skew <- function(x) { z <- x - mean(x); mean(z^3) / mean(z^2)^1.5 }
+exkurt <- function(x) { z <- x - mean(x); mean(z^4) / mean(z^2)^2 - 3 }
+
+num_vars <- c(price_k = "Response: sale price ($1000s)",
+              sqft100 = "Finished floor area (100 sq ft)",
+              lot_k = "Lot size (1000 sq ft)",
+              sale_month = "Month contract signed (1-12)")
+num_tab <- data.frame(
+  variable = names(num_vars), description = unname(num_vars),
+  mean = sapply(names(num_vars), function(v) mean(train[[v]])),
+  sd = sapply(names(num_vars), function(v) sd(train[[v]])),
+  min = sapply(names(num_vars), function(v) min(train[[v]])),
+  median = sapply(names(num_vars), function(v) median(train[[v]])),
+  max = sapply(names(num_vars), function(v) max(train[[v]])),
+  skewness = sapply(names(num_vars), function(v) skew(train[[v]])),
+  missing = sapply(names(num_vars), function(v) sum(is.na(train[[v]]))),
+  row.names = NULL)
+knitr::kable(num_tab, digits = 2, caption = "Numerical variables (training set)")
+
+cat_vars <- names(factor_levels)
+cat_tab <- data.frame(
+  variable = cat_vars,
+  levels = sapply(cat_vars, function(v) nlevels(train[[v]])),
+  counts = sapply(cat_vars, function(v) {
+    tb <- table(train[[v]]); paste(names(tb), tb, sep = ": ", collapse = "; ")
+  }),
+  missing = sapply(cat_vars, function(v) sum(is.na(train[[v]]))),
+  row.names = NULL)
+knitr::kable(cat_tab, caption = "Categorical variables (training set; first level = reference)")
+```
+
+```{r helpers}
+skew <- function(x) { z <- x - mean(x); mean(z^3) / mean(z^2)^1.5 }
+exkurt <- function(x) { z <- x - mean(x); mean(z^4) / mean(z^2)^2 - 3 }
+r2 <- function(m) summary(m)$r.squared
+adjr2 <- function(m) summary(m)$adj.r.squared
+# Conventional nested F-test for terms that differ between two models
+pf_test <- function(full, red) {
+  a <- anova(red, full)
+  c(F = a$F[2], df = a$Df[2], p = a[2, "Pr(>F)"], dR2 = r2(full) - r2(red))
+}
+fp <- function(p) formatC(p, format = "e", digits = 2)       # p-values for tables
+div_slopes <- function(m, x, V = vcov(m), df = df.residual(m)) {
+  b <- coef(m)
+  t(sapply(division_levels, function(g) {
+    L <- setNames(numeric(length(b)), names(b)); L[x] <- 1
+    if (g != "SouthAtlantic") L[paste0(x, ":division", g)] <- 1
+    est <- sum(L * b); se <- sqrt(drop(t(L) %*% V %*% L)); tq <- qt(0.975, df)
+    c(est = est, se = se, lower = est - tq * se, upper = est + tq * se,
+      p = 2 * pt(-abs(est / se), df))
+  }))
+}
+fig_out <- function(name, width, height, draw) {
+  png(file.path("figures", name), width = width, height = height, units = "in", res = 200)
+  draw(); invisible(dev.off()); draw()
+}
+pt_col <- adjustcolor("#33658a", alpha.f = 0.25); ln_col <- "#d1495b"
+```
+
+```{r diagnostic-tools}
+diagnostic_grid <- function(m,label) {
+  mf <- model.frame(m); y <- model.response(mf); e <- resid(m); yh <- fitted(m)
+  nv <- names(mf)[-1][vapply(mf[-1],is.numeric,logical(1))]
+  par(mfrow=c(2,ceiling((4+length(nv))/2)),mar=c(4.2,4.2,2.5,1),las=1)
+  plot(yh,y,pch=16,cex=.3,col=pt_col,xlab="Fitted response",ylab="Observed response",main=label)
+  abline(0,1,lty=2); lines(lowess(yh,y),col=ln_col,lwd=2)
+  plot(yh,e,pch=16,cex=.3,col=pt_col,xlab="Fitted response",ylab="Residual",main="Residuals vs fitted")
+  abline(h=0,lty=2); lines(lowess(yh,e),col=ln_col,lwd=2)
+  plot(yh,sqrt(abs(rstandard(m))),pch=16,cex=.3,col=pt_col,xlab="Fitted response",ylab="sqrt(|standardized residual|)",main="Scale-location")
+  lines(lowess(yh,sqrt(abs(rstandard(m)))),col=ln_col,lwd=2)
+  qqnorm(rstandard(m),pch=16,cex=.3,col=pt_col,main="Normal Q-Q");qqline(rstandard(m),col=ln_col)
+  nv <- names(mf)[-1][vapply(mf[-1],is.numeric,logical(1))]
+  for(v in nv) {
+    plot(mf[[v]],e,pch=16,cex=.3,col=pt_col,xlab=v,ylab="Residual",main=paste("Residuals:",v))
+    abline(h=0,lty=2);lines(lowess(mf[[v]],e),col=ln_col,lwd=2)
+  }
+}
+predictor_grid <- function(m,label) {
+ mf<-model.frame(m); xx<-mf[-1]; xx<-xx[vapply(xx,is.numeric,logical(1))]
+ if(ncol(xx)<2)return(invisible(NULL))
+ pairs(xx,pch=16,cex=.25,col=pt_col,main=label,
+       lower.panel=function(x,y,...){points(x,y,...);lines(lowess(x,y),col=ln_col,lwd=2)})
+}
+category_grid <- function(m,label) {
+ mf<-model.frame(m); cats<-names(mf)[vapply(mf,is.factor,logical(1))]
+ par(mfrow=c(ceiling(length(cats)/3),3),mar=c(5,4,2,1),cex.axis=.7)
+ for(v in cats) {boxplot(resid(m)~mf[[v]],outline=TRUE,cex=.25,las=2,
+     xlab="",ylab="Residual",main=v,col="#e0e9ee");abline(h=0,lty=2,col=ln_col)}
+}
+```
+
+# Preliminary model and diagnostic order
+
+First inspect the response-versus-fitted relationship and numerical predictor relationships (the course
+Conditions 1 and 2), then residual mean patterns, spread, tails and possible dependence. Finally inspect
+collinearity and influence. These plots provide limited diagnostic evidence; one violation can affect another plot.
+
+```{r initial-model}
+ctrl_all <- "lot_k + stories + bedrooms + fullbath + halfbath + garage + foundation + fireplace + hoa + age_restricted + wall + heat_fuel + sewer + stage + sale_month"
+f1 <- as.formula(paste("price_k ~ sqft100 * division +", ctrl_all))
+m1 <- lm(f1, data = train)
+m1_noint <- update(m1, . ~ . - sqft100:division)
+m1_noX <- update(m1, . ~ . - sqft100:division - sqft100)
+p1_int_F <- pf_test(m1, m1_noint)
+p1_int_F
+slopes_p1 <- div_slopes(m1, "sqft100")
+```
+
+```{r initial-conditions, fig.width=9, fig.height=7}
+predictor_grid(m1,"Initial numerical predictor relationships")
+```
+
+```{r initial-diagnostics, fig.width=11, fig.height=7}
+diagnostic_grid(m1,"Initial: raw price")
+```
+
+```{r initial-categories, fig.width=11, fig.height=13}
+category_grid(m1,"Initial categories")
+```
+
+Raw-price residuals show curvature, fanning and heavy tails. The response-fitted plot is broadly
+increasing; numerical predictor pairs are only a limited screen for the conditional-mean predictor
+condition. Survey sampling and distinct records do not establish independent errors: builder and
+subdivision identifiers are unavailable. No residual-order plot can recover those missing clusters.
+
+# Transformations
+
+The first Box-Cox profile uses the original raw-area design. Changing the predictor scale changes
+that design, so we also profile the response after replacing raw area by log area. We compare raw price,
+log price and an inverse-square-root response with matched predictor specifications. The latter is
+`z = -2 * (price_k^(-0.5) - 1)`, where `price_k` is price in thousands of dollars.
+This transformation is increasing: a positive area coefficient still indicates a positive size-price
+association. Transformations are chosen from residual evidence, not from the smallest interaction p-value.
+
+```{r boxcox, fig.width=7, fig.height=4.5}
+# y = TRUE stores the response so that boxcox() does not need to re-fit the model
+bc <- boxcox(lm(f1, data = train, y = TRUE), lambda = seq(-1, 0.5, by = 0.001), plotit = FALSE)
+lambda_hat <- bc$x[which.max(bc$y)]
+lambda_ci <- range(bc$x[bc$y > max(bc$y) - qchisq(0.95, 1) / 2])
+# exact maximiser of the same profile log-likelihood
+X1 <- model.matrix(m1); y1 <- train$price_k; qr1 <- qr(X1)
+bc_ll <- function(l) {
+  yt <- if (abs(l) < 1e-12) log(y1) else (y1^l - 1) / l
+  -n / 2 * log(sum(qr.resid(qr1, yt)^2)) + (l - 1) * sum(log(y1))
+}
+lambda_exact <- optimize(bc_ll, c(-1, 0.5), maximum = TRUE, tol = 1e-10)$maximum
+c(lambda_grid = lambda_hat, ci_low = lambda_ci[1], ci_high = lambda_ci[2], lambda_exact = lambda_exact)
+par(mar = c(4.5, 4.5, 2, 1), las = 1)
+plot(bc$x, bc$y, type = "l", xlab = expression(lambda), ylab = "Profile log-likelihood",
+     main = "Box-Cox profile (Part 1 design)", cex.main = 1)
+abline(v = c(lambda_hat, lambda_ci), lty = c(1, 2, 2), col = ln_col)
+abline(v = 0, lty = 3)
+```
+
+```{r transform-comparison, fig.width=7, fig.height=4.5}
+train$bc_m05 <- -2*(train$price_k^(-0.5)-1)
+f_loglin <- as.formula(paste("log_price ~ sqft100 * division +",ctrl_all))
+f_loglog <- as.formula(paste("log_price ~ log_sqft * division +",ctrl_all))
+f_bc05 <- as.formula(paste("bc_m05 ~ sqft100 * division +",ctrl_all))
+f_bc_log <- as.formula(paste("bc_m05 ~ log_sqft * division +",ctrl_all))
+m_loglin<-lm(f_loglin,data=train);m_loglog<-lm(f_loglog,data=train)
+m_bc05<-lm(f_bc05,data=train);m_bc_log<-lm(f_bc_log,data=train)
+# Same Box-Cox method, now conditional on the log-area design.
+bc_log<-boxcox(lm(as.formula(paste("price_k ~ log_sqft * division +",ctrl_all)),data=train,y=TRUE),
+ lambda=seq(-.8,.3,.001),plotit=FALSE)
+lambda_log<-bc_log$x[which.max(bc_log$y)]
+lambda_log_ci<-range(bc_log$x[bc_log$y>max(bc_log$y)-qchisq(.95,1)/2])
+# Descriptive equal-count fifths summarize spread; this is not a hypothesis test.
+spread_summary<-function(m){
+ rs<-rstandard(m);q<-cut(rank(fitted(m),ties.method="first"),breaks=seq(0,nobs(m),length.out=6),include.lowest=TRUE)
+ v<-tapply(abs(rs),q,median)
+ c(low=unname(v[1]),high=unname(v[5]),ratio=unname(v[5]/v[1]))
+}
+candidate_models<-list(raw_price=m1,log_price_raw_area=m_loglin,log_price_log_area=m_loglog,
+ inverse_sqrt_raw_area=m_bc05,inverse_sqrt_log_area=m_bc_log)
+candidate_metrics<-do.call(rbind,lapply(names(candidate_models),function(nm){
+ mm<-candidate_models[[nm]];ss<-spread_summary(mm);rs<-rstandard(mm)
+ data.frame(model=nm,response=as.character(formula(mm)[[2]]),coefficients=length(coef(mm)),
+ BIC=BIC(mm),R2=r2(mm),std_residual_skew=skew(rs),std_residual_excess_kurtosis=exkurt(rs),
+ low_fifth_spread=ss["low"],high_fifth_spread=ss["high"],high_low_spread_ratio=ss["ratio"])
+}))
+write.csv(candidate_metrics,"results/transformation_comparison.csv",row.names=FALSE)
+knitr::kable(candidate_metrics,digits=3,caption="Candidate evidence. BIC/R-squared are comparable only within the same response scale. Spread ratio near 1 describes similar end-fifth spread, not proof of homoscedasticity.")
+plot(bc_log$x,bc_log$y,type="l",xlab="Response power",ylab="Profile log-likelihood",main="Box-Cox after log(area)")
+abline(v=c(lambda_log,lambda_log_ci),lty=c(1,2,2));abline(v=-.5,col=ln_col)
+```
+
+```{r transform-diagnostics, fig.width=11, fig.height=7}
+for(nm in c("m_loglin","m_loglog","m_bc05","m_bc_log")) {
+ diagnostic_grid(get(nm),nm)
+ predictor_grid(get(nm),paste(nm,"predictor relationships"))
+}
+```
+
+With the original design, the profile estimate is `r sprintf("%.3f",lambda_exact)`
+(95% profile interval [`r sprintf("%.3f",lambda_ci[1])`, `r sprintf("%.3f",lambda_ci[2])`]).
+With log area it is `r sprintf("%.3f",lambda_log)`
+([`r sprintf("%.3f",lambda_log_ci[1])`, `r sprintf("%.3f",lambda_log_ci[2])`]); -0.5 is now directly supported.
+The log/log candidate has a high-to-low fitted-fifth residual-spread ratio of
+`r sprintf("%.2f",spread_summary(m_loglog)["ratio"])`, versus
+`r sprintf("%.2f",spread_summary(m_bc_log)["ratio"])` for inverse-square-root/log.
+The latter also reduces standardized-residual skewness and has a flatter mean pattern than its raw-area counterpart.
+We therefore choose the inverse-square-root response with log area for the primary analysis.
+The previous log/log specification is retained as a scale-sensitivity comparison, not defended solely
+because its interpretation is simpler. Q-Q tail deviations remain; these diagnostics improve rather
+than prove the assumptions. Do not compare BIC or R-squared across different response scales.
+
+
+# Collinearity and variable selection
+
+We use automated backward BIC for a reproducible, parsimonious search across the optional control
+groups. A completely manual search would make repeated discretionary testing harder to audit.
+Practical and ethical constraints remain manual: preserve floor area, division, their interaction,
+and lot size on substantive grounds; respect hierarchy; retain valid extreme homes rather than
+remove them to improve significance. BIC uses a different penalty from a 5% partial-F rule.
+AIC and the full model are sensitivity analyses, not alternative routes to the smallest p-value.
+Module 9 (slide 48) warns that ordinary F/t p-values after automated selection are no longer
+valid for confirmatory inference and ordinary intervals can be misleading. The numbers below
+are exploratory model summaries, not calibrated confirmation of a regional population difference.
+Choosing a manual search would not by itself remove data-dependent selection uncertainty.
+
+Centering changes the intercept and division main-effect interpretation. It can reduce structural
+collinearity from the interaction, but does not eliminate genuine relationships among housing features.
+
+```{r vif}
+# Ordinary VIF = 1/(1-R_j^2) for each encoded design column (Module 7).
+column_vif<-function(m,label){
+ X<-model.matrix(m);jj<-which(colnames(X)!="(Intercept)")
+ vv<-sapply(jj,function(j){a<-lm.fit(X[,-j,drop=FALSE],X[,j]);
+ sum((X[,j]-mean(X[,j]))^2)/sum(a$residuals^2)})
+ data.frame(parameterization=label,column=colnames(X)[jj],VIF=vv,row.names=NULL)
+}
+train$log_sqft_c<-train$log_sqft-mean(train$log_sqft)
+m_full_centered<-lm(update(f_bc_log,.~.-log_sqft*division+log_sqft_c*division),data=train)
+candidate_vif<-rbind(column_vif(m1,"raw_initial"),column_vif(m_bc_log,"chosen_full"),
+ column_vif(m_full_centered,"chosen_full_centered"))
+write.csv(candidate_vif,"results/candidate_column_VIF.csv",row.names=FALSE)
+for(nm in unique(candidate_vif$parameterization)){
+ vv<-subset(candidate_vif,parameterization==nm);vv<-vv[order(-vv$VIF),]
+ print(knitr::kable(head(vv,10),digits=3,caption=paste("Largest encoded-column VIFs:",nm)))
+}
+```
+
+```{r drop1}
+d1 <- drop1(m_bc_log, scope = ~ stories + bedrooms + fullbath + halfbath + garage + foundation +
+              fireplace + hoa + age_restricted + wall + heat_fuel + sewer + stage + sale_month + lot_k,
+            test = "F")
+d1[order(-d1[, "Pr(>F)"]), ]
+# the research-question terms: interaction, and X + interaction
+rbind(interaction = pf_test(m_bc_log, update(m_bc_log, . ~ . - log_sqft:division)),
+      area_and_interaction = pf_test(m_bc_log, update(m_bc_log, . ~ . - log_sqft:division - log_sqft)))
+```
+
+```{r selection}
+lower_f <- ~ log_sqft * division + lot_k
+sel_aic <- step(m_bc_log, scope = list(lower = lower_f, upper = formula(m_bc_log)),
+                direction = "backward", k = 2, trace = 0)
+sel_bic <- step(m_bc_log, scope = list(lower = lower_f, upper = formula(m_bc_log)),
+                direction = "backward", k = log(n), trace = 0)
+sel_aic$anova
+sel_bic$anova
+
+# replay each path: partial F of the dropped term, R^2 and adj R^2 after each step
+replay <- function(start, path, k) {
+  drops <- sub("^- ", "", as.character(path$Step[-1]))
+  cur <- start
+  out <- data.frame(step = 0, dropped = "(full inverse-square-root model)", criterion = extractAIC(cur, k = k)[2],
+                    BIC_R = BIC(cur), df = NA, F = NA, p = NA, R2 = r2(cur), adjR2 = adjr2(cur))
+  for (i in seq_along(drops)) {
+    new <- update(cur, as.formula(paste(". ~ . -", drops[i])))
+    a <- anova(new, cur)
+    out <- rbind(out, data.frame(step = i, dropped = drops[i], criterion = extractAIC(new, k = k)[2],
+                                 BIC_R = BIC(new), df = a$Df[2], F = a$F[2], p = a[2, "Pr(>F)"],
+                                 R2 = r2(new), adjR2 = adjr2(new)))
+    cur <- new
+  }
+  out
+}
+hist_bic <- replay(m_bc_log, sel_bic$anova, log(n))
+hist_aic <- replay(m_bc_log, sel_aic$anova, 2)
+knitr::kable(hist_bic, digits = c(0, 0, 3, 3, 0, 3, 5, 5, 5),
+             caption = "Table 3. Grouped backward selection path, with supporting partial F-tests.")
+knitr::kable(hist_aic, digits = c(0, 0, 3, 3, 0, 3, 5, 5, 5), caption = "Table 3. Grouped backward selection path, with supporting partial F-tests.")
+
+# joint partial F: are the BIC-dropped terms jointly needed?
+anova(sel_bic, m_bc_log)
+```
+
+```{r selection-diagnostics, fig.width=11, fig.height=7}
+cur <- m_bc_log
+for(term in hist_bic$dropped[-1]) {
+ cur <- update(cur,as.formula(paste(". ~ . -",term)))
+ diagnostic_grid(cur,paste("After removing",term))
+}
+```
+
+BIC removes `r paste(hist_bic$dropped[-1],collapse=", ")`. AIC removes
+`r paste(hist_aic$dropped[-1],collapse=", ")`. We retain the existing BIC specification after reviewing
+the diagnostic sequence, keeping AIC as a sensitivity comparison.
+
+The stage removal illustrates why BIC is not a 5% significance rule: its nominal partial-F
+p-value is `r fp(tail(hist_bic$p,1))`, yet removing its two coefficients changes BIC by
+`r sprintf("%.3f",tail(hist_bic$BIC_R,1)-tail(hist_bic$BIC_R,2)[1])`.
+This is a modest BIC preference, not evidence that sale stage has no association.
+AIC retains stage; the sensitivity table quantifies the resulting change in the focal estimates.
+We choose BIC for parsimony and disclose this criterion dependence rather than claiming a unique best model.
+
+# Final model and evidence
+
+The final response is `z = 2 - 2/sqrt(price_k)`, with log area by division and the controls below.
+The eight-coefficient interaction null is equality of the nine area slopes **on this transformed scale**.
+Coefficients and their ordinary intervals are the primary model summaries. A transformed-price slope
+is not a constant price elasticity.
+
+For a readable illustration we fix a **hypothetical model-index baseline** of $500,000, rather than
+estimate an intercept for a chosen house. If `g(P)=2-2/sqrt(P)` and a regional slope is `b`, increasing
+area by 10% changes the fitted transformed response by `b*log(1.1)`. The price index becomes
+`g_inverse(g(500)+b*log(1.1))`, where `g_inverse(z)=(1-z/2)^(-2)` for `z<2`.
+We transform the slope interval monotonically at this fixed reference; baseline estimation uncertainty
+is not included because the reference is stipulated, not estimated. All intervals are pointwise and
+ignore selection uncertainty.
+
+This index is the inverse of the fitted mean of transformed price, **not arithmetic mean price**,
+not automatically the median, and not the former log-model geometric mean. Effects depend on the
+baseline; tables also show $300,000 and $700,000 references. Covariates stay fixed within each comparison;
+we do not assert that otherwise identical homes in all divisions have the same baseline price.
+
+```{r final}
+ctrl_fin <- "lot_k + stories + bedrooms + fullbath + halfbath + garage + foundation + fireplace + wall + heat_fuel"
+f_final <- as.formula(paste("bc_m05 ~ log_sqft * division +",ctrl_fin))
+m2<-lm(f_final,data=train)
+stopifnot(setequal(attr(terms(m2),"term.labels"),attr(terms(sel_bic),"term.labels")),
+ !anyNA(coef(m2)),m2$rank==length(coef(m2)),all(fitted(m2)<2))
+m2_noint<-update(m2,.~.-log_sqft:division);m2_noX<-update(m2,.~.-log_sqft:division-log_sqft)
+s2<-summary(m2);p2_int_F<-pf_test(m2,m2_noint);p2_X<-pf_test(m2,m2_noX)
+p2_int_F
+el<-div_slopes(m2,"log_sqft")
+index_change<-function(slope,baseline=500){
+ z0<-2-2/sqrt(baseline);z1<-z0+slope*log(1.1)
+ stopifnot(all(z1<2))
+ 100*((1-z1/2)^(-2)/baseline-1)
+}
+ci2<-confint(m2)
+final_coef<-data.frame(term=names(coef(m2)),estimate=coef(m2),se=s2$coefficients[,2],
+ lower95=ci2[,1],upper95=ci2[,2],row.names=NULL)
+knitr::kable(final_coef,digits=6,caption="Full final inverse-square-root model. Conventional intervals do not account for selection.")
+```
+
+```{r intervals-and-exports}
+division_names<-c("South Atlantic","New England","Middle Atlantic","East North Central","West North Central","East South Central","West South Central","Mountain","Pacific")
+effects<-data.frame(division=division_names,n=as.vector(table(train$division)[division_levels]),
+ transformed_slope=el[,"est"],OLS_low=el[,"lower"],OLS_high=el[,"upper"],
+ reference_price_dollars=500000,pct=index_change(el[,"est"]),
+ pct_low=index_change(el[,"lower"]),pct_high=index_change(el[,"upper"]))
+reference_effects<-do.call(rbind,lapply(c(300,500,700),function(p0)
+ data.frame(division=division_names,reference_price_dollars=p0*1000,pct=index_change(el[,"est"],p0))))
+write.csv(effects,"results/regional_effects.csv",row.names=FALSE)
+write.csv(reference_effects,"results/reference_price_effects.csv",row.names=FALSE)
+write.csv(final_coef,"results/final_coefficients.csv",row.names=FALSE)
+write.csv(hist_bic,"results/selection_path.csv",row.names=FALSE)
+write.csv(hist_aic,"results/selection_path_AIC.csv",row.names=FALSE)
+model_comparison<-data.frame(model=c("Full inverse-square-root","AIC selected","BIC selected"),
+ coefficients=sapply(list(m_bc_log,sel_aic,m2),function(m)length(coef(m))),
+ BIC=sapply(list(m_bc_log,sel_aic,m2),BIC),R2=sapply(list(m_bc_log,sel_aic,m2),r2))
+write.csv(model_comparison,"results/model_comparison.csv",row.names=FALSE)
+knitr::kable(effects,digits=4,caption="Regional transformed-price slopes and nominal 95% intervals. Percentage illustration uses a fixed $500,000 price index, not mean sale price.")
+knitr::kable(reference_effects,digits=2,caption="The same slope implies different percentage index changes at different reference prices.")
+knitr::kable(model_comparison,digits=4,caption="Same response scale: parsimony versus fit.")
+```
+
+## Final-model collinearity
+
+```{r final-collinearity}
+m2_centered<-lm(update(f_final,.~.-log_sqft*division+log_sqft_c*division),data=train)
+centering_max_fit_diff<-max(abs(fitted(m2)-fitted(m2_centered)))
+stopifnot(centering_max_fit_diff<1e-10)
+final_vif<-rbind(column_vif(m2,"original"),column_vif(m2_centered,"centered_log_area"))
+write.csv(final_vif,"results/final_column_VIF.csv",row.names=FALSE)
+knitr::kable(final_vif,digits=3,caption="Complete final-model VIFs: ordinary auxiliary regressions for all encoded columns, before and after centering.")
+```
+
+Centering changes the reference size for division intercepts, with a maximum fitted-value difference
+of `r format(centering_max_fit_diff,scientific=TRUE,digits=3)`; it does not improve fit or remove
+substantive dependence among housing characteristics. The numerical log-area column still has VIF
+`r sprintf("%.2f",subset(final_vif,parameterization=="centered_log_area" & column=="log_sqft_c")$VIF)`.
+Area shares information with room counts and other features. We retain the research variable and
+report its uncertainty rather than remove it to satisfy a threshold. The largest centered encoded-column VIF is
+`r sprintf("%.2f",max(subset(final_vif,parameterization=="centered_log_area")$VIF))`
+(for `r subset(final_vif,parameterization=="centered_log_area")$column[which.max(subset(final_vif,parameterization=="centered_log_area")$VIF)]`).
+Some bathroom-category indicators remain strongly redundant with other columns. Dummy-variable
+reference coding and correlations among housing features both affect these column diagnostics.
+We do not claim that centering eliminates collinearity; coefficients for individual controls can be
+poorly determined. Full rank rules out exact aliasing but not imprecision. The focal area estimate is
+conditional on these correlated controls, another reason to avoid a causal or overprecise interpretation.
+
+```{r final-diagnostics, fig.width=11, fig.height=7}
+e2 <- resid(m2); yhat2 <- fitted(m2); r2s <- rstandard(m2)
+draw_final <- function() {
+  par(mfrow = c(2, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(yhat2, train$bc_m05, pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted transformed price",
+       ylab = "Observed transformed price", main = "Condition 1: Y vs fitted", cex.main = 1)
+  abline(0, 1, lty = 2); lines(lowess(yhat2, train$log_price, f = 0.3), col = ln_col, lwd = 2)
+  plot(yhat2, e2, pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted transformed price", ylab = "Residual",
+       main = "Residuals vs fitted", cex.main = 1)
+  abline(h = 0, lty = 2); lines(lowess(yhat2, e2, f = 0.3), col = ln_col, lwd = 2)
+  plot(yhat2, sqrt(abs(r2s)), pch = 16, cex = 0.4, col = pt_col, xlab = "Fitted transformed price",
+       ylab = "sqrt(|standardized residual|)", main = "Scale-location", cex.main = 1)
+  lines(lowess(yhat2, sqrt(abs(r2s)), f = 0.3), col = ln_col, lwd = 2)
+  qqnorm(r2s, pch = 16, cex = 0.4, col = pt_col, main = "Normal QQ", cex.main = 1)
+  qqline(r2s, col = ln_col, lwd = 2)
+  for (v in c("log_sqft", "lot_k")) {
+    plot(train[[v]], e2, pch = 16, cex = 0.4, col = pt_col, xlab = v, ylab = "Residual",
+         main = paste("Residuals vs", v), cex.main = 1)
+    abline(h = 0, lty = 2); lines(lowess(train[[v]], e2, f = 0.3), col = ln_col, lwd = 2)
+  }
+}
+fig_out("part2_final_residuals.png", 12, 7.6, draw_final)
+```
+
+```{r final-predictors, fig.width=8, fig.height=7}
+predictor_grid(m2,"Final numerical predictor relationships")
+```
+
+```{r final-categories, fig.width=11, fig.height=11}
+category_grid(m2,"Final categorical residuals")
+```
+
+The observed-versus-fitted and residual smoothers are approximately linear/flat over the main
+training range after the inverse-square-root/log transformation. The scale-location trend is much
+flatter than in the raw-price or log-price models, but no graph establishes perfectly constant variance.
+Category residual panels are retained to inspect group-specific spread. The predictor pair plots are
+only a limited screen, not proof of all conditional relationships. Normal Q-Q tails still deviate;
+independence is unverified because fine geographic/builder identifiers are unavailable.
+Selection and transformation choice also use these training data. Consequently the ordinary p-values
+are exploratory, not calibrated confirmation, and nominal intervals may misstate uncertainty.
+
+
+# Influence and targeted sensitivity
+
+Influence thresholds flag records for investigation, not automatic deletion. We retain observations
+without documented errors, record the most influential IDs, and refit after removing each of the ten
+largest Cook distances one at a time. These are sensitivity checks; the full-data model remains primary.
+
+```{r influence}
+infl_table <- function(m, focal) {
+  N <- nobs(m); p <- length(coef(m))
+  h <- hatvalues(m); r <- rstandard(m); cd <- cooks.distance(m); dff <- dffits(m)
+  dfb <- dfbetas(m)[, focal, drop = FALSE]
+  base <- data.frame(
+    measure = c("leverage h_ii", "|standardized residual|", "Cook's D", "Cook's D", "|DFFITS|"),
+    cutoff_rule = c("2p/n", "4", "4/n", "F(0.5; p, n-p)", "2*sqrt(p/n)"),
+    cutoff = c(2 * p / N, 4, 4 / N, qf(0.5, p, N - p), 2 * sqrt(p / N)),
+    n_beyond = c(sum(h > 2 * p / N), sum(abs(r) > 4), sum(cd > 4 / N), sum(cd > qf(0.5, p, N - p)),
+                 sum(abs(dff) > 2 * sqrt(p / N))),
+    max_value = c(max(h), max(abs(r)), max(cd), max(cd), max(abs(dff))))
+  fb <- data.frame(measure = paste("|DFBETAS|", focal), cutoff_rule = "2/sqrt(n)",
+                   cutoff = 2 / sqrt(N), n_beyond = colSums(abs(dfb) > 2 / sqrt(N)),
+                   max_value = apply(abs(dfb), 2, max), row.names = NULL)
+  rbind(base, fb)
+}
+focal1 <- c("sqft100", paste0("sqft100:division", division_levels[-1]))
+focal2 <- c("log_sqft", paste0("log_sqft:division", division_levels[-1]))
+infl1 <- infl_table(m1, focal1); infl2 <- infl_table(m2, focal2)
+knitr::kable(infl1, digits = 4, caption = "Influence screening: initial and final models, respectively")
+knitr::kable(infl2, digits = 4, caption = "Influence screening: initial and final models, respectively")
+```
+
+```{r influence-plot, fig.width=11, fig.height=4}
+draw_infl <- function() {
+  N <- nobs(m2); p <- length(coef(m2))
+  par(mfrow = c(1, 3), mar = c(4.5, 5, 3, 1), las = 1)
+  plot(hatvalues(m2), rstandard(m2), pch = 16, cex = 0.4, col = pt_col, xlab = "Leverage",
+       ylab = "Standardized residual", main = "Leverage vs standardized residual", cex.main = 1)
+  abline(v = 2 * p / N, h = c(-4, 4), lty = 2, col = ln_col)
+  plot(cooks.distance(m2), type = "h", xlab = "Observation", ylab = "Cook's D",
+       main = "Cook's distance", cex.main = 1)
+  abline(h = 4 / N, lty = 2, col = ln_col)
+  plot(dffits(m2), type = "h", xlab = "Observation", ylab = "DFFITS", main = "DFFITS", cex.main = 1)
+  abline(h = c(-1, 1) * 2 * sqrt(p / N), lty = 2, col = ln_col)
+}
+fig_out("part2_final_influence.png", 12, 4, draw_infl)
+```
+
+```{r influence-sensitivity}
+top <- head(order(cooks.distance(m2),decreasing=TRUE),10)
+influence_cases <- data.frame(id=train$id[top],cooks_D=cooks.distance(m2)[top],
+ leverage=hatvalues(m2)[top],standardized_residual=rstandard(m2)[top],
+ price_flag=train$slpr_flag[top],sqft_flag=train$sqft_flag[top],lot_flag=train$lot_flag[top])
+leave_one <- do.call(rbind,lapply(top,function(i){
+ mm<-lm(f_final,data=train[-i,]); es<-div_slopes(mm,"log_sqft")
+ data.frame(removed_id=train$id[i],max_abs_slope_change=max(abs(es[,"est"]-el[,"est"])),
+ max_abs_index_pctpoint_change=max(abs(index_change(es[,"est"])-index_change(el[,"est"]))),
+ interaction_F_p=pf_test(mm,update(mm,.~.-log_sqft:division))["p"])
+}))
+write.csv(influence_cases,"results/influential_records.csv",row.names=FALSE)
+write.csv(leave_one,"results/influence_sensitivity.csv",row.names=FALSE)
+knitr::kable(influence_cases,digits=4,caption="Table 5. Ten largest Cook distances and disclosure flags.")
+knitr::kable(leave_one,digits=5,caption="Table 6. One-at-a-time deletion sensitivity, not a new selected model.")
+```
+
+```{r sensitivity}
+sens_models <- list(full_inverse_sqrt=m_bc_log,AIC=sel_aic,
+ no_price_coding=lm(f_final,data=train[train$slpr_flag==0,]),
+ no_price_area_lot_coding=lm(f_final,data=train[train$slpr_flag==0 & train$sqft_flag==0 & train$lot_flag==0,]))
+sensitivity <- do.call(rbind,lapply(names(sens_models),function(nm){
+ mm<-sens_models[[nm]]; es<-div_slopes(mm,"log_sqft")
+ data.frame(model=nm,n=nobs(mm),interaction_F_p=pf_test(mm,update(mm,.~.-log_sqft:division))["p"],
+ max_abs_slope_change=max(abs(es[,"est"]-el[,"est"])),
+ max_abs_index_pctpoint_change=max(abs(index_change(es[,"est"])-index_change(el[,"est"]))))
+}))
+write.csv(sensitivity,"results/sensitivity.csv",row.names=FALSE)
+sensitivity_slopes <- data.frame(division=division_names, baseline=el[,"est"],sapply(sens_models,function(mm) div_slopes(mm,"log_sqft")[,"est"]))
+write.csv(sensitivity_slopes,"results/sensitivity_slopes.csv",row.names=FALSE)
+knitr::kable(sensitivity,digits=5,caption="Table 7. Targeted coefficient sensitivity checks; F p-values retain the same assumption limitations.")
+
+```
+
+Removing each of the ten largest Cook-distance observations one at a time changes the $500,000
+reference percentage-index contrast by at most
+`r sprintf("%.2f",max(leave_one$max_abs_index_pctpoint_change))` percentage points.
+Excluding jointly flagged price/area/lot observations changes it by as much as
+`r sprintf("%.2f",sensitivity$max_abs_index_pctpoint_change[sensitivity$model=="no_price_area_lot_coding"])`
+percentage points. We report changes in magnitude, not just whether p-values remain small.
+Exclusions change the population analysed and do not undo disclosure coding; no flagged observations
+are automatically removed from the primary model.
+
+For response-scale sensitivity, the previous log-price model gives constant percentage geometric-mean
+contrasts. It answers a different transformed-mean question, so its slopes should not be directly
+subtracted from the new slopes. We place the new fixed-reference index contrasts beside those older
+log-model contrasts only to show how an apparently simple regional ranking depends on the estimand.
+
+```{r response-scale-sensitivity}
+old_log_model<-lm(update(f_final,log_price~.),data=train)
+old_log_slopes<-div_slopes(old_log_model,"log_sqft")
+scale_comparison<-data.frame(division=division_names,
+ inverse_sqrt_index_pct_at_500k=effects$pct,
+ log_model_geometric_mean_pct=100*(1.1^old_log_slopes[,"est"]-1))
+write.csv(scale_comparison,"results/response_scale_sensitivity.csv",row.names=FALSE)
+knitr::kable(scale_comparison,digits=2,caption="Different response-scale estimands; these are not interchangeable estimates of arithmetic mean price.")
+```
+
+
+# Frozen model and optional test evaluation
+
+The current inverse-square-root specification is saved before any test evaluation. The earlier
+log-model review freeze is superseded without using held-out outcomes. Predictions use training
+estimates unchanged; no model is fitted or selected on the test sample. The optional evaluation below
+scores the transformed response. Its RMSE cannot be compared numerically with a previous log-scale
+RMSE. Back-transformed indices are not claimed as arithmetic-mean price predictions.
+
+```{r freeze}
+freeze <- list(formula=paste(deparse(f_final,width.cutoff=500),collapse=" "),
+ coefficients=coef(m2),train_ids=train$id,split_md5=unname(tools::md5sum("data/split_ids.csv")),
+ raw_md5=unname(tools::md5sum("data/original/soc25.csv")))
+saveRDS(freeze,"results/frozen_specification.rds")
+jsonlite::write_json(freeze,"results/frozen_specification.json",pretty=TRUE,auto_unbox=TRUE)
+```
+
+```{r test-evaluation}
+if(isTRUE(params$evaluate_test)) {
+ all_data<-read.csv("data/cleaned/soc_clean_review.csv")
+ test<-as_model_factors(all_data[all_data$split=="test",]);rm(all_data)
+ test$bc_m05 <- -2*(test$price_k^(-.5)-1);test$log_sqft<-log(test$sqft100*100)
+ stopifnot(nrow(test)==1855, !any(test$id %in% train$id))
+ pred<-predict(m2,newdata=test)
+ stopifnot(all(is.finite(pred)))
+ test_metrics<-data.frame(n=nrow(test),RMSE_transformed=sqrt(mean((test$bc_m05-pred)^2)),
+ MAE_transformed=mean(abs(test$bc_m05-pred)),
+ R2_test=1-sum((test$bc_m05-pred)^2)/sum((test$bc_m05-mean(test$bc_m05))^2))
+ write.csv(test_metrics,"results/test_metrics.csv",row.names=FALSE)
+ knitr::kable(test_metrics,digits=4,caption="Table 9. Fixed-model test predictions; no refitting.")
+} else cat("Test evaluation disabled. Training results are not held-out performance.")
+```
+
+# Conclusion and limitations
+
+The fitted transformed-price slopes are positive in all nine divisions. For a fixed hypothetical
+$500,000 model-index baseline, 10% more area corresponds to fitted index changes from
+`r sprintf("%.1f",min(effects$pct))`% to `r sprintf("%.1f",max(effects$pct))`%.
+This is a conditional illustration, not a constant elasticity or an arithmetic-mean price effect.
+The eight-coefficient interaction comparison gives F(`r p2_int_F["df"]`,`r df.residual(m2)`)=
+`r round(p2_int_F["F"],2)`, nominal p=`r fp(p2_int_F["p"])`, and adds
+`r sprintf("%.4f",p2_int_F["dR2"])` to training R-squared on the transformed scale.
+Automated selection invalidates ordinary confirmatory interpretation (Module 9, slide 48);
+unverified independence, residual tail deviations and other selection steps compound that limitation.
+
+The estimated variation is qualitatively consistent with Sirmans et al. (2006), while construction-cost
+mechanisms and quantile-specific patterns in the other studies remain untested. Interpretation and
+regional ordering change with response scale. New England has only 39 training observations.
+Complete-case selection, disclosure coding and missing fine location/builder identifiers limit
+population generalization. A future study should use those identifiers and survey-design information,
+then assess an agreed specification on new data. No held-out performance is claimed here.
+
+
+# References
+
+Gyourko, J., & Saiz, A. (2006). Construction costs and the supply of housing structure. *Journal of Regional Science, 46*(4), 661-680. https://doi.org/10.1111/j.1467-9787.2006.00472.x
+
+Sirmans, G. S., MacDonald, L., Macpherson, D. A., & Zietz, E. N. (2006). The value of housing characteristics: A meta analysis. *The Journal of Real Estate Finance and Economics, 33*, 215-240. https://doi.org/10.1007/s11146-006-9983-5
+
+Zietz, J., Sirmans, G. S., & Smersh, G. (2008). The impact of inflation on home prices and the valuation of housing characteristics across the price distribution. *Journal of Housing Research, 17*(2), 119-137. https://doi.org/10.1080/10835547.2008.12091992
+
+U.S. Census Bureau. (2026). *Survey of Construction microdata: 2025 file*. https://www.census.gov/construction/chars/microdata.html
+
+U.S. Census Bureau. (n.d.). *Survey of Construction microdata files: Variable guide*. Included with the data package.
+
+# Reproducibility record
+
+
+```{r poster-diagnostic-figure}
+for(nm in c("raw","log","final")){
+ mm<-switch(nm,raw=m1,log=old_log_model,final=m2)
+ write.csv(data.frame(fitted=fitted(mm),standardized=rstandard(mm)),paste0("figures/poster_",nm,"_data.csv"),row.names=FALSE)
+ sm<-lowess(fitted(mm),sqrt(abs(rstandard(mm))))
+ write.csv(data.frame(x=sm$x,y=sm$y),paste0("figures/poster_",nm,"_smoother.csv"),row.names=FALSE)
+}
+png("figures/poster_diagnostics.png",width=1800,height=1300,res=180)
+par(mfrow=c(2,2),mar=c(4,4,2,1),las=1)
+for(mm in list(m1,m2)){
+ plot(fitted(mm),sqrt(abs(rstandard(mm))),pch=16,cex=.3,col=pt_col,xlab="Fitted response",ylab="sqrt(|standardized residual|)")
+ lines(lowess(fitted(mm),sqrt(abs(rstandard(mm)))),col=ln_col,lwd=2)
+ qqnorm(rstandard(mm),pch=16,cex=.3,col=pt_col);qqline(rstandard(mm),col=ln_col,lwd=2)
+};dev.off()
+```
+
+```{r export-results}
+diagnostic_models<-list(raw_price=m1,previous_log_price=old_log_model,final_inverse_sqrt=m2)
+diagnostic_numbers<-do.call(rbind,lapply(names(diagnostic_models),function(nm){
+ mm<-diagnostic_models[[nm]];rr<-rstandard(mm);ss<-spread_summary(mm)
+ data.frame(model=nm,R2=r2(mm),adjR2=adjr2(mm),std_residual_skew=skew(rr),
+ std_residual_excess_kurtosis=exkurt(rr),max_Cook=max(cooks.distance(mm)),spread_ratio=ss["ratio"])
+}))
+write.csv(diagnostic_numbers,"results/diagnostic_numbers.csv",row.names=FALSE)
+summary_numbers<-list(revision=2,response="2-2/sqrt(price_k)",n_train=n,coefficient_count=length(coef(m2)),
+ F=as.list(p2_int_F),lambda_original=lambda_exact,lambda_original_ci=lambda_ci,
+ lambda_log_area=lambda_log,lambda_log_area_ci=lambda_log_ci,
+ train_RMSE_transformed=sqrt(mean(resid(m2)^2)),reference_price_dollars=500000,
+ min_index_pct=min(effects$pct),max_index_pct=max(effects$pct),
+ max_leave_one_pctpoint_change=max(leave_one$max_abs_index_pctpoint_change),
+ max_flags_pctpoint_change=sensitivity$max_abs_index_pctpoint_change[sensitivity$model=="no_price_area_lot_coding"],
+ centering_max_fit_diff=centering_max_fit_diff,test_evaluated=isTRUE(params$evaluate_test))
+jsonlite::write_json(summary_numbers,"results/summary.json",pretty=TRUE,auto_unbox=TRUE,digits=12)
+saveRDS(list(model=m2,train=train,raw_model=m1,old_log_model=old_log_model,full_model=m_bc_log),"results/review_models.rds")
+writeLines(capture.output(sessionInfo()),"results/sessionInfo.txt")
+sessionInfo()
+```

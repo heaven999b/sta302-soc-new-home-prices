@@ -1,0 +1,24 @@
+{
+  "revision": 2,
+  "response": "2-2/sqrt(price_k)",
+  "n_train": 4330,
+  "coefficient_count": 46,
+  "F": {
+    "F": 16.67721973346,
+    "df": 8,
+    "p": 1.39959137181e-24,
+    "dR2": 0.007748861057449
+  },
+  "lambda_original": -0.4208348653062,
+  "lambda_original_ci": [-0.47, -0.372],
+  "lambda_log_area": -0.504,
+  "lambda_log_area_ci": [-0.554, -0.455],
+  "train_RMSE_transformed": 0.009715209714656,
+  "reference_price_dollars": 500000,
+  "min_index_pct": 4.277291475446,
+  "max_index_pct": 8.623357020175,
+  "max_leave_one_pctpoint_change": 0.1855626274057,
+  "max_flags_pctpoint_change": 1.997651876634,
+  "centering_max_fit_diff": 2.797762022055e-14,
+  "test_evaluated": false
+}

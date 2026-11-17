@@ -1,0 +1,8 @@
+"step","rows_remaining"
+"All 2025 SOC records",25246
+"CAT = 1 (house built for sale)",16849
+"Sales contract signed in 2025",8901
+"Detached (DET = 1) and not in a condominium project (CON = 2)",7382
+"Sale price reported (SLPR > 0)",7062
+"Floor area and lot size reported (SQFS > 0, AREA > 0)",6315
+"No 'not reported' code in any categorical predictor",6185
